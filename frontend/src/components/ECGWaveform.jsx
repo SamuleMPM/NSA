@@ -1,26 +1,44 @@
 import React, { useRef, useEffect } from 'react';
-import { Activity, Zap, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Activity, Zap, CheckCircle2, ShieldAlert, Waves, Radio } from 'lucide-react';
+import StatusPill from './ui/StatusPill';
 
 export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnabled = false }) {
   const canvasRef = useRef(null);
   const audioCtxRef = useRef(null);
+  const safeHeartRate = Math.max(40, Math.min(180, Number(heartRate) || 75));
 
-  // Generador de tono sintetizado para pulso cardíaco (Web Audio API)
-  const playHeartbeatBeep = () => {
-    if (!soundEnabled) return;
+  // Refs para que el bucle de dibujo no se reinicie con cada lectura de telemetría.
+  const heartRateRef = useRef(safeHeartRate);
+  const alertRef = useRef(isAlert);
+  const soundRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    heartRateRef.current = safeHeartRate;
+  }, [safeHeartRate]);
+
+  useEffect(() => {
+    alertRef.current = isAlert;
+  }, [isAlert]);
+
+  useEffect(() => {
+    soundRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  // Sintetizador de pulso cardíaco (Web Audio API)
+  const playHeartbeatBeep = (activeAlert, soundOn) => {
+    if (!soundOn) return;
     try {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
       }
       const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
+      if (ctx.state === 'suspended') ctx.resume();
+
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
+
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(isAlert ? 880 : 560, ctx.currentTime);
+      osc.frequency.setValueAtTime(activeAlert ? 880 : 560, ctx.currentTime);
       gain.gain.setValueAtTime(0.035, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
 
@@ -38,15 +56,23 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
-
-    let width = (canvas.width = canvas.parentElement.clientWidth);
-    let height = (canvas.height = 110);
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
 
     const handleResize = () => {
       if (!canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = 110;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.parentElement.clientWidth;
+      height = canvas.parentElement.clientHeight || 168;
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+
+    handleResize();
     window.addEventListener('resize', handleResize);
 
     let x = 0;
@@ -54,106 +80,122 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
     let cyclePhase = 0;
     let lastBeepTime = 0;
 
-    // Cuadrícula de calibración médica ECG (25mm/s - 10mm/mV)
     const drawGrid = () => {
-      ctx.fillStyle = '#060A14';
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, '#06101B');
+      bg.addColorStop(1, '#040A12');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // Cuadrícula fina (cada 10px)
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.04)';
+      // Cuadrícula fina (0.04 s / 0.1 mV)
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.055)';
       ctx.lineWidth = 0.5;
-      for (let gx = 0; gx < width; gx += 10) {
+      for (let gx = 0; gx < width; gx += 8) {
         ctx.beginPath();
         ctx.moveTo(gx, 0);
         ctx.lineTo(gx, height);
         ctx.stroke();
       }
-      for (let gy = 0; gy < height; gy += 10) {
+      for (let gy = 0; gy < height; gy += 8) {
         ctx.beginPath();
         ctx.moveTo(0, gy);
         ctx.lineTo(width, gy);
         ctx.stroke();
       }
 
-      // Cuadrícula mayor (cada 50px)
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.09)';
-      ctx.lineWidth = 1;
-      for (let gx = 0; gx < width; gx += 50) {
+      // Cuadrícula mayor (0.20 s / 0.5 mV)
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.13)';
+      ctx.lineWidth = 0.75;
+      for (let gx = 0; gx < width; gx += 40) {
         ctx.beginPath();
         ctx.moveTo(gx, 0);
         ctx.lineTo(gx, height);
         ctx.stroke();
       }
-      for (let gy = 0; gy < height; gy += 50) {
+      for (let gy = 0; gy < height; gy += 40) {
         ctx.beginPath();
         ctx.moveTo(0, gy);
         ctx.lineTo(width, gy);
         ctx.stroke();
       }
+
+      // Baseline
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
     };
 
     drawGrid();
 
-    // Modelo de forma de onda P-Q-R-S-T
+    // Modelo P-Q-R-S-T
     const getECGValue = (phase) => {
-      if (phase < 0.12) return 0; // Línea base
-      if (phase < 0.20) return Math.sin((phase - 0.12) / 0.08 * Math.PI) * 0.14; // Onda P
-      if (phase < 0.28) return 0; // Segmento PR
-      if (phase < 0.32) return -((phase - 0.28) / 0.04) * 0.22; // Onda Q
-      if (phase < 0.38) return ((phase - 0.32) / 0.06) * 1.35 - 0.22; // Onda R
-      if (phase < 0.44) return 1.13 - ((phase - 0.38) / 0.06) * 1.45; // Onda S
-      if (phase < 0.50) return -0.32 + ((phase - 0.44) / 0.06) * 0.32; // Retorno a baseline
-      if (phase < 0.65) return 0; // Segmento ST
-      if (phase < 0.85) return Math.sin((phase - 0.65) / 0.2 * Math.PI) * 0.28; // Onda T
-      return 0; // Línea base
+      if (phase < 0.12) return 0;
+      if (phase < 0.20) return Math.sin(((phase - 0.12) / 0.08) * Math.PI) * 0.14;
+      if (phase < 0.28) return 0;
+      if (phase < 0.32) return -((phase - 0.28) / 0.04) * 0.22;
+      if (phase < 0.38) return ((phase - 0.32) / 0.06) * 1.35 - 0.22;
+      if (phase < 0.44) return 1.13 - ((phase - 0.38) / 0.06) * 1.45;
+      if (phase < 0.50) return -0.32 + ((phase - 0.44) / 0.06) * 0.32;
+      if (phase < 0.65) return 0;
+      if (phase < 0.85) return Math.sin(((phase - 0.65) / 0.2) * Math.PI) * 0.28;
+      return 0;
     };
 
     const render = (time) => {
-      const beatsPerSecond = Math.max(40, Math.min(180, heartRate)) / 60;
+      const activeAlert = alertRef.current;
+      const beatsPerSecond = heartRateRef.current / 60;
       const speed = 2.2;
-
       const step = 0.015 * (beatsPerSecond / 1.25);
       cyclePhase = (cyclePhase + step) % 1;
 
-      // Disparo de beep en el complejo QRS
       if (cyclePhase > 0.33 && cyclePhase < 0.38 && time - lastBeepTime > 400) {
-        playHeartbeatBeep();
+        playHeartbeatBeep(activeAlert, soundRef.current);
         lastBeepTime = time;
       }
 
-      // Franja de barrido de fósforo
-      const scanBarWidth = 14;
-      ctx.fillStyle = '#060A14';
+      // Haz de barrido: limpia y redibuja la cuadrícula local
+      const scanBarWidth = 26;
+      ctx.fillStyle = '#050C15';
       ctx.fillRect(x, 0, scanBarWidth, height);
 
-      // Re-dibujar cuadrícula en la zona de borrado
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.06)';
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
       ctx.lineWidth = 0.5;
-      for (let gx = Math.floor(x / 10) * 10; gx <= x + scanBarWidth; gx += 10) {
+      for (let gx = Math.floor(x / 8) * 8; gx <= x + scanBarWidth; gx += 8) {
         ctx.beginPath();
         ctx.moveTo(gx, 0);
         ctx.lineTo(gx, height);
         ctx.stroke();
       }
-      for (let gy = 0; gy < height; gy += 10) {
+      for (let gy = 0; gy < height; gy += 8) {
         ctx.beginPath();
         ctx.moveTo(x, gy);
         ctx.lineTo(x + scanBarWidth, gy);
         ctx.stroke();
       }
 
-      const ecgVal = getECGValue(cyclePhase);
-      const midY = height / 2;
-      const newY = midY - ecgVal * (height * 0.40);
+      // Barrido luminoso
+      const sweep = ctx.createLinearGradient(x, 0, x + scanBarWidth, 0);
+      sweep.addColorStop(0, 'rgba(34, 211, 238, 0)');
+      sweep.addColorStop(0.75, 'rgba(34, 211, 238, 0.035)');
+      sweep.addColorStop(1, 'rgba(34, 211, 238, 0.16)');
+      ctx.fillStyle = sweep;
+      ctx.fillRect(x, 0, scanBarWidth, height);
 
-      // Trazo de la onda
+      const ecgVal = getECGValue(cyclePhase);
+      const newY = height / 2 - ecgVal * (height * 0.46);
+      const stroke = activeAlert ? '#FB7185' : '#22D3EE';
+
       ctx.beginPath();
       ctx.moveTo(x, lastY);
       ctx.lineTo(x + speed, newY);
-      ctx.strokeStyle = isAlert ? '#EF4444' : '#00E5FF';
+      ctx.strokeStyle = stroke;
       ctx.lineWidth = 1.8;
-      ctx.shadowColor = isAlert ? 'rgba(239, 68, 68, 0.7)' : 'rgba(0, 229, 255, 0.7)';
-      ctx.shadowBlur = 4;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = activeAlert ? 'rgba(251, 113, 133, 0.8)' : 'rgba(34, 211, 238, 0.8)';
+      ctx.shadowBlur = 7;
       ctx.stroke();
       ctx.shadowBlur = 0;
 
@@ -162,6 +204,7 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
 
       if (x >= width) {
         x = 0;
+        lastY = height / 2;
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -173,46 +216,104 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [heartRate, isAlert, soundEnabled]);
+  }, []);
 
   return (
-    <div className="hud-panel p-3 rounded-lg border border-space-700/80">
-      
-      {/* Header del Osciloscopio */}
-      <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-space-700/60 font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <Activity className={`w-3.5 h-3.5 ${isAlert ? "text-telemetry-crimson animate-pulse" : "text-telemetry-cyan"}`} />
-          <span className="font-heading font-semibold text-xs tracking-wider text-slate-200 uppercase">
-            OSCILOSCOPIO // ECG CONTINUO (LEAD II)
+    <section className="panel overflow-hidden">
+      <div className="flex flex-col gap-2 border-b border-space-700/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className={`flex h-7 w-7 items-center justify-center rounded-md border ${isAlert ? 'border-rose-400/30 bg-rose-400/[0.08] text-rose-300' : 'border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan'}`}>
+            <Activity className={`h-3.5 w-3.5 ${isAlert ? 'animate-pulse' : ''}`} aria-hidden="true" />
           </span>
-          <span className="text-[9px] px-1.5 py-0.2 rounded bg-space-850 text-slate-400 border border-space-700">
-            25 mm/s • 10 mm/mV • 0.05-150Hz
-          </span>
+          <div>
+            <span className="eyebrow block">CONTINUOUS TELEMETRY / LEAD II</span>
+            <h3 className="font-heading text-[13px] font-bold text-slate-100">
+              Osciloscopio electrocardiográfico
+            </h3>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-400 hidden sm:inline">RITMO SINUSAL:</span>
-          <span className={`px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 ${
-            isAlert 
-              ? "bg-red-950/80 text-telemetry-crimson border border-red-500/60 animate-pulse shadow-hud-danger" 
-              : "bg-emerald-950/40 text-telemetry-green border border-emerald-500/40"
-          }`}>
-            <Zap className="w-3 h-3" /> {heartRate} BPM
-          </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="pill">25 mm/s</span>
+          <span className="pill">10 mm/mV</span>
+          <span className="pill">0.05–150 Hz</span>
+          <StatusPill status={isAlert ? 'critical' : 'nominal'}>
+            {isAlert ? 'ARRITMIA / ALERTA' : 'RITMO SINUSAL'}
+          </StatusPill>
         </div>
       </div>
 
-      {/* Pantalla del Osciloscopio */}
-      <div className="relative w-full h-[110px] rounded overflow-hidden border border-space-700 bg-[#060A14]">
-        <canvas ref={canvasRef} className="w-full h-full block" />
-        <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#060A14] to-transparent pointer-events-none" />
+      <div className="grid gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_180px]">
+        <div className="relative overflow-hidden rounded-md border border-space-700/80 bg-[#040A12]">
+          <div className="relative h-[172px] w-full sm:h-[188px]">
+            <canvas ref={canvasRef} className="block h-full w-full" aria-label="Onda ECG continua Lead II" role="img" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#040A12]/35" />
+
+            <div className="pointer-events-none absolute left-2.5 top-2 flex items-center gap-2">
+              <span className="mono rounded border border-cyan-400/20 bg-space-950/70 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyan-300">
+                LEAD II
+              </span>
+              <span className="mono text-[8px] tracking-widest text-slate-600">P-Q-R-S-T</span>
+            </div>
+
+            <div className="pointer-events-none absolute bottom-2 left-2.5 flex items-center gap-2 font-mono text-[8px] text-slate-600">
+              <span>25 mm/s</span>
+              <span className="h-2 w-px bg-slate-700" />
+              <span>10 mm/mV</span>
+            </div>
+
+            <div className="pointer-events-none absolute right-2.5 top-2 flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${isAlert ? 'bg-rose-400' : 'bg-cyan-400'} animate-pulse`} />
+              <span className={`mono text-[8px] font-bold tracking-widest ${isAlert ? 'text-rose-300' : 'text-cyan-300'}`}>
+                LIVE
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+          <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
+            <div>
+              <span className="eyebrow block">HEART RATE</span>
+              <span className="value-md text-slate-100">{safeHeartRate}</span>
+            </div>
+            <span className="mono text-[9px] text-slate-500">BPM</span>
+          </div>
+
+          <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
+            <div>
+              <span className="eyebrow block">RHYTHM</span>
+              <span className={`mono text-[10px] font-bold ${isAlert ? 'text-rose-300' : 'text-emerald-300'}`}>
+                {isAlert ? 'IRREGULAR' : 'SINUS'}
+              </span>
+            </div>
+            {isAlert ? (
+              <ShieldAlert className="h-3.5 w-3.5 text-rose-300" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+            )}
+          </div>
+
+          <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
+            <div>
+              <span className="eyebrow block">SIGNAL</span>
+              <span className="mono text-[10px] font-bold text-cyan-300">2.1 kΩ</span>
+            </div>
+            <Waves className="h-3.5 w-3.5 text-telemetry-cyan" aria-hidden="true" />
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 mt-1">
-        <span>SISTEMA DE FILTRADO DIGITAL: ACTIVO</span>
-        <span>DERIVACIÓN: L-II // IMPEDANCIA ELECTRODO: 2.1 kΩ (NOMINAL)</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-space-700/60 px-4 py-2 font-mono text-[9px] text-slate-600">
+        <span className="flex items-center gap-1.5">
+          <Zap className="h-3 w-3 text-telemetry-cyan" aria-hidden="true" />
+          FILTRO DIGITAL ACTIVO · 250 Hz
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Radio className="h-3 w-3 text-telemetry-green" aria-hidden="true" />
+          ELECTRODO L-II · IMPEDANCIA NOMINAL
+        </span>
       </div>
-
-    </div>
+    </section>
   );
 }

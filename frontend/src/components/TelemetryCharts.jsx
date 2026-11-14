@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
-import { LineChart, Activity, Thermometer, Wind, Heart, TrendingUp } from 'lucide-react';
+import { LineChart, Activity, Thermometer, Wind, Heart, ArrowUpRight } from 'lucide-react';
+import StatusPill from './ui/StatusPill';
+
+function smoothPath(points) {
+  if (!points.length) return '';
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+  let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+    const tension = 0.18;
+    const cp1x = p1.x + (p2.x - p0.x) * tension;
+    const cp1y = p1.y + (p2.y - p0.y) * tension;
+    const cp2x = p2.x - (p3.x - p1.x) * tension;
+    const cp2y = p2.y - (p3.y - p1.y) * tension;
+    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+  return d;
+}
 
 export default function TelemetryCharts({ history = [] }) {
   const [activeMetric, setActiveMetric] = useState('heart_rate');
 
   if (!history || history.length < 2) {
     return (
-      <div className="hud-panel p-6 rounded-lg text-center font-mono text-xs text-slate-400">
-        RECOPILANDO TELEMETRÍA PARA ANÁLISIS TEMPORAL...
+      <div className="panel p-8 text-center">
+        <Activity className="mx-auto mb-2 h-6 w-6 text-slate-600" aria-hidden="true" />
+        <p className="mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+          Recopilando telemetría para análisis temporal…
+        </p>
       </div>
     );
   }
@@ -15,244 +39,305 @@ export default function TelemetryCharts({ history = [] }) {
   const metricConfigs = {
     heart_rate: {
       label: 'Frecuencia Cardíaca',
-      short: 'FC',
+      short: 'HR',
       unit: 'bpm',
-      color: '#EF4444',
+      color: '#FB7185',
       gradientId: 'grad-hr-nasa',
-      icon: <Heart className="w-3.5 h-3.5 text-red-400" />,
+      icon: Heart,
       minRange: 45,
       maxRange: 155,
       normalMin: 60,
-      normalMax: 100
+      normalMax: 100,
     },
     spo2: {
       label: 'Saturación SpO2',
       short: 'SpO2',
       unit: '%',
-      color: '#00E5FF',
+      color: '#22D3EE',
       gradientId: 'grad-spo2-nasa',
-      icon: <Activity className="w-3.5 h-3.5 text-telemetry-cyan" />,
+      icon: Activity,
       minRange: 80,
       maxRange: 100,
       normalMin: 95,
-      normalMax: 100
+      normalMax: 100,
     },
     temperature: {
       label: 'Temperatura Corporal',
       short: 'TEMP',
       unit: '°C',
-      color: '#F59E0B',
+      color: '#FBBF24',
       gradientId: 'grad-temp-nasa',
-      icon: <Thermometer className="w-3.5 h-3.5 text-telemetry-amber" />,
+      icon: Thermometer,
       minRange: 35.5,
       maxRange: 39.5,
       normalMin: 36.1,
-      normalMax: 37.2
+      normalMax: 37.2,
     },
     respiratory_rate: {
       label: 'Frecuencia Respiratoria',
-      short: 'FR',
+      short: 'RR',
       unit: 'rpm',
-      color: '#3B82F6',
+      color: '#60A5FA',
       gradientId: 'grad-rr-nasa',
-      icon: <Wind className="w-3.5 h-3.5 text-telemetry-blue" />,
+      icon: Wind,
       minRange: 8,
       maxRange: 32,
       normalMin: 12,
-      normalMax: 20
-    }
+      normalMax: 20,
+    },
   };
 
   const currentCfg = metricConfigs[activeMetric];
-  const values = history.map(h => h[activeMetric]);
+  const CurrentIcon = currentCfg.icon;
+  const values = history.map((h) => Number(h[activeMetric])).filter((n) => Number.isFinite(n));
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
   const latestVal = values[values.length - 1];
   const avgVal = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
 
-  // Dimensiones del gráfico SVG
-  const svgWidth = 720;
-  const svgHeight = 180;
-  const paddingX = 45;
-  const paddingY = 20;
+  const svgWidth = 840;
+  const svgHeight = 260;
+  const paddingX = 48;
+  const paddingY = 26;
+  const paddingBottom = 32;
 
   const effectiveWidth = svgWidth - paddingX * 2;
-  const effectiveHeight = svgHeight - paddingY * 2;
+  const effectiveHeight = svgHeight - paddingY - paddingBottom;
 
   const yMin = Math.min(currentCfg.minRange, Math.floor(minVal - 2));
   const yMax = Math.max(currentCfg.maxRange, Math.ceil(maxVal + 2));
 
-  // Puntos calculados
   const points = history.map((item, idx) => {
     const x = paddingX + (idx / (history.length - 1)) * effectiveWidth;
-    const normY = (item[activeMetric] - yMin) / (yMax - yMin);
-    const y = svgHeight - paddingY - normY * effectiveHeight;
+    const normY = (Number(item[activeMetric]) - yMin) / (yMax - yMin);
+    const y = svgHeight - paddingBottom - normY * effectiveHeight;
     return { x, y, val: item[activeMetric], time: item.timestamp };
   });
 
-  const pathD = points.reduce((acc, pt, i) => {
-    return i === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
-  }, '');
+  const pathD = smoothPath(points);
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${svgHeight - paddingBottom} L ${points[0].x} ${svgHeight - paddingBottom} Z`;
 
-  const areaD = `${pathD} L ${points[points.length - 1].x} ${svgHeight - paddingY} L ${points[0].x} ${svgHeight - paddingY} Z`;
-
-  // Banda de rango normal
   const normYTop = paddingY + (1 - (currentCfg.normalMax - yMin) / (yMax - yMin)) * effectiveHeight;
   const normYBottom = paddingY + (1 - (currentCfg.normalMin - yMin) / (yMax - yMin)) * effectiveHeight;
-  const clampedTop = Math.max(paddingY, Math.min(svgHeight - paddingY, normYTop));
-  const clampedBottom = Math.max(paddingY, Math.min(svgHeight - paddingY, normYBottom));
+  const clampedTop = Math.max(paddingY, Math.min(svgHeight - paddingBottom, normYTop));
+  const clampedBottom = Math.max(paddingY, Math.min(svgHeight - paddingBottom, normYBottom));
   const zoneHeight = Math.max(2, clampedBottom - clampedTop);
+  const isInRange = latestVal >= currentCfg.normalMin && latestVal <= currentCfg.normalMax;
 
   return (
-    <div className="hud-panel p-3.5 rounded-lg border border-space-700/80">
-      
-      {/* Header y Selector de Métrica */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5 pb-2 border-b border-space-700/60 font-mono text-xs">
-        <div>
-          <div className="flex items-center gap-2">
-            <LineChart className="w-4 h-4 text-telemetry-cyan" />
-            <h3 className="font-heading font-semibold text-xs tracking-wider text-slate-100 uppercase">
-              SERIE TEMPORAL // TELEMETRÍA BIOMÉDICA
+    <section className="panel overflow-hidden">
+      <div className="flex flex-col gap-3 border-b border-space-700/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan">
+            <LineChart className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+          <div>
+            <span className="eyebrow block">TEMPORAL ANALYSIS / MULTI-CHANNEL</span>
+            <h3 className="font-heading text-[13px] font-bold text-slate-100">
+              Evolución biomédica y tendencia
             </h3>
           </div>
-          <span className="text-[10px] text-slate-400 block mt-0.5">
-            BUFFER: {history.length} MUESTRAS • TASA: 0.5 HZ • INTERPOLACIÓN: LINEAL
-          </span>
         </div>
 
-        {/* Selector de Canales */}
-        <div className="flex items-center gap-1 p-0.5 rounded bg-space-950 border border-space-700">
-          {Object.entries(metricConfigs).map(([key, cfg]) => (
-            <button
-              key={key}
-              onClick={() => setActiveMetric(key)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
-                activeMetric === key
-                  ? "bg-space-800 text-telemetry-cyan border border-telemetry-cyan/40 font-bold"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-space-900 border border-transparent"
-              }`}
-            >
-              {cfg.icon}
-              <span>{cfg.short}</span>
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="pill">{history.length} muestras</span>
+          <span className="pill">0.5 Hz</span>
+          <StatusPill status={isInRange ? 'nominal' : 'warning'}>
+            {isInRange ? 'EN RANGO' : 'FUERA DE RANGO'}
+          </StatusPill>
         </div>
       </div>
 
-      {/* Strip de Estadísticas Rápidas */}
-      <div className="grid grid-cols-5 gap-2 mb-2 p-2 rounded bg-space-950 border border-space-700 font-mono text-xs">
-        <div>
-          <span className="text-[9px] text-slate-400 block">PARÁMETRO</span>
-          <span className="font-bold text-slate-200 truncate block">{currentCfg.label}</span>
-        </div>
-        <div>
-          <span className="text-[9px] text-slate-400 block">ACTUAL</span>
-          <span className="font-bold text-telemetry-cyan">{latestVal} {currentCfg.unit}</span>
-        </div>
-        <div>
-          <span className="text-[9px] text-slate-400 block">MÍNIMO</span>
-          <span className="font-semibold text-slate-300">{minVal} {currentCfg.unit}</span>
-        </div>
-        <div>
-          <span className="text-[9px] text-slate-400 block">PROMEDIO</span>
-          <span className="font-semibold text-slate-300">{avgVal} {currentCfg.unit}</span>
-        </div>
-        <div>
-          <span className="text-[9px] text-slate-400 block">MÁXIMO</span>
-          <span className="font-bold text-red-400">{maxVal} {currentCfg.unit}</span>
-        </div>
-      </div>
-
-      {/* Gráfico SVG Técnico */}
-      <div className="relative w-full rounded overflow-hidden bg-[#060A14] border border-space-700 p-1">
-        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
-          <defs>
-            <linearGradient id={currentCfg.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={currentCfg.color} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={currentCfg.color} stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-
-          {/* Líneas de cuadrícula horizontal con etiquetas de valor */}
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-            const y = paddingY + ratio * effectiveHeight;
-            const refVal = Math.round(yMax - ratio * (yMax - yMin));
+      <div className="flex flex-col gap-3 p-3.5 sm:p-4">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {Object.entries(metricConfigs).map(([key, cfg]) => {
+            const Icon = cfg.icon;
+            const active = activeMetric === key;
             return (
-              <g key={ratio}>
-                <line
-                  x1={paddingX}
-                  y1={y}
-                  x2={svgWidth - paddingX}
-                  y2={y}
-                  stroke="rgba(56, 189, 248, 0.07)"
-                  strokeDasharray="3 3"
-                />
-                <text
-                  x={paddingX - 8}
-                  y={y + 3}
-                  textAnchor="end"
-                  fill="#64748B"
-                  fontSize="8"
-                  fontFamily="monospace"
-                >
-                  {refVal}
-                </text>
-              </g>
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveMetric(key)}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[10px] font-semibold transition-colors ${
+                  active
+                    ? 'border-cyan-400/35 bg-cyan-400/[0.08] text-cyan-200'
+                    : 'border-space-700/70 bg-space-900/40 text-slate-500 hover:border-space-600 hover:text-slate-300'
+                }`}
+                aria-pressed={active}
+              >
+                <Icon className="h-3 w-3" style={{ color: active ? cfg.color : undefined }} aria-hidden="true" />
+                <span>{cfg.short}</span>
+                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-cyan-300/60' : 'text-slate-600'}`}>
+                  {cfg.unit}
+                </span>
+              </button>
             );
           })}
+        </div>
 
-          {/* Banda de rango normal */}
-          <rect
-            x={paddingX}
-            y={clampedTop}
-            width={effectiveWidth}
-            height={zoneHeight}
-            fill="rgba(16, 185, 129, 0.05)"
-            stroke="rgba(16, 185, 129, 0.2)"
-            strokeDasharray="2 2"
-          />
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <div className="panel-inset px-2.5 py-2">
+            <span className="eyebrow block">CANAL</span>
+            <span className="mt-1 flex items-center gap-1.5 font-heading text-[11px] font-bold text-slate-200">
+              <CurrentIcon className="h-3.5 w-3.5" style={{ color: currentCfg.color }} aria-hidden="true" />
+              {currentCfg.label}
+            </span>
+          </div>
+          <div className="panel-inset px-2.5 py-2">
+            <span className="eyebrow block">ACTUAL</span>
+            <span className="value-sm mt-1 block" style={{ color: currentCfg.color }}>
+              {latestVal} <span className="text-[9px] font-normal text-slate-500">{currentCfg.unit}</span>
+            </span>
+          </div>
+          <div className="panel-inset px-2.5 py-2">
+            <span className="eyebrow block">MÍNIMO</span>
+            <span className="value-sm mt-1 block text-slate-300">{minVal}</span>
+          </div>
+          <div className="panel-inset px-2.5 py-2">
+            <span className="eyebrow block">PROMEDIO</span>
+            <span className="value-sm mt-1 block text-slate-300">{avgVal}</span>
+          </div>
+          <div className="panel-inset px-2.5 py-2">
+            <span className="eyebrow block">MÁXIMO</span>
+            <span className="value-sm mt-1 block text-rose-300">{maxVal}</span>
+          </div>
+        </div>
 
-          {/* Área sombreada */}
-          <path d={areaD} fill={`url(#${currentCfg.gradientId})`} />
+        <div className="relative overflow-hidden rounded-md border border-space-700/80 bg-[#040A12] p-1">
+          <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="h-auto w-full" role="img" aria-label={`Gráfico temporal de ${currentCfg.label}`}>
+            <defs>
+              <linearGradient id={currentCfg.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor={currentCfg.color} stopOpacity="0.26" />
+                <stop offset="100%" stopColor={currentCfg.color} stopOpacity="0" />
+              </linearGradient>
+              <filter id={`glow-${activeMetric}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-          {/* Trazo vectorial principal */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke={currentCfg.color}
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              const y = paddingY + ratio * effectiveHeight;
+              const refVal = Math.round(yMax - ratio * (yMax - yMin));
+              return (
+                <g key={ratio}>
+                  <line
+                    x1={paddingX}
+                    y1={y}
+                    x2={svgWidth - paddingX}
+                    y2={y}
+                    stroke="rgba(148, 197, 255, 0.09)"
+                    strokeDasharray="2 5"
+                  />
+                  <text
+                    x={paddingX - 10}
+                    y={y + 3}
+                    textAnchor="end"
+                    fill="#5E7392"
+                    fontSize="9"
+                    fontFamily="'JetBrains Mono', monospace"
+                  >
+                    {refVal}
+                  </text>
+                </g>
+              );
+            })}
 
-          {/* Puntos y etiquetas temporales */}
-          {points.map((pt, i) => (
-            <g key={i}>
-              <circle
-                cx={pt.x}
-                cy={pt.y}
-                r={i === points.length - 1 ? 3.5 : 2}
-                fill={i === points.length - 1 ? "#FFFFFF" : currentCfg.color}
-                stroke={currentCfg.color}
-                strokeWidth={1}
-              />
-              {(i === 0 || i === points.length - 1 || i === Math.floor(points.length / 2)) && (
-                <text
-                  x={pt.x}
-                  y={svgHeight - 6}
-                  textAnchor="middle"
-                  fill="#64748B"
-                  fontSize="8"
-                  fontFamily="monospace"
-                >
-                  {pt.time}
-                </text>
-              )}
-            </g>
-          ))}
-        </svg>
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              const x = paddingX + ratio * effectiveWidth;
+              return (
+                <line
+                  key={ratio}
+                  x1={x}
+                  y1={paddingY}
+                  x2={x}
+                  y2={svgHeight - paddingBottom}
+                  stroke="rgba(148, 197, 255, 0.045)"
+                  strokeDasharray="2 8"
+                />
+              );
+            })}
+
+            <rect
+              x={paddingX}
+              y={clampedTop}
+              width={effectiveWidth}
+              height={zoneHeight}
+              fill="rgba(52, 211, 153, 0.075)"
+              stroke="rgba(52, 211, 153, 0.26)"
+              strokeDasharray="3 4"
+            />
+            <text
+              x={paddingX + 7}
+              y={clampedTop + 11}
+              fill="#6EE7B7"
+              fontSize="8"
+              fontFamily="'JetBrains Mono', monospace"
+              letterSpacing="1"
+            >
+              RANGO NOMINAL
+            </text>
+
+            <path d={areaD} fill={`url(#${currentCfg.gradientId})`} />
+            <path
+              d={pathD}
+              fill="none"
+              stroke={currentCfg.color}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter={`url(#glow-${activeMetric})`}
+            />
+
+            {points.map((pt, i) => {
+              const isLast = i === points.length - 1;
+              const isAnchor = i === 0 || isLast || i === Math.floor(points.length / 2);
+              return (
+                <g key={i}>
+                  {isLast ? (
+                    <>
+                      <circle cx={pt.x} cy={pt.y} r="7" fill={currentCfg.color} opacity="0.12" />
+                      <circle cx={pt.x} cy={pt.y} r="3.2" fill="#FFFFFF" stroke={currentCfg.color} strokeWidth="1.5" />
+                    </>
+                  ) : (
+                    <circle cx={pt.x} cy={pt.y} r="1.7" fill={currentCfg.color} opacity={i % 3 === 0 ? 0.75 : 0.25} />
+                  )}
+                  {isAnchor ? (
+                    <text
+                      x={pt.x}
+                      y={svgHeight - 10}
+                      textAnchor="middle"
+                      fill="#5E7392"
+                      fontSize="8"
+                      fontFamily="'JetBrains Mono', monospace"
+                    >
+                      {pt.time}
+                    </text>
+                  ) : null}
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] text-slate-600">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: currentCfg.color }} />
+            {currentCfg.label.toUpperCase()} · {currentCfg.unit}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm border border-emerald-400/40 bg-emerald-400/10" />
+            BANDA DE RANGO SEGURO
+          </span>
+          <span className="flex items-center gap-1">
+            <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            {history[history.length - 1]?.timestamp || '--:--:--'} · ÚLTIMA MUESTRA
+          </span>
+        </div>
       </div>
-
-    </div>
+    </section>
   );
 }

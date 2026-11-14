@@ -8,6 +8,15 @@ import AlertManagement from './modules/AlertManagement';
 import DataIntegration from './modules/DataIntegration';
 import JsonModal from './components/JsonModal';
 import DataDictionaryModal from './components/DataDictionaryModal';
+import { Radio } from 'lucide-react';
+
+const MODULE_LABELS = {
+  general: 'Panel General',
+  telemetry: 'Telemetría y ECG',
+  simulator: 'Simulador de Misión',
+  alerts: 'Alertas y Soluciones',
+  integration: 'Integración y Datos',
+};
 
 // Evaluación clínica de constantes vitales según docs/DATA_DICTIONARY.md
 function evaluateVital(variable, value) {
@@ -275,7 +284,7 @@ export default function App() {
   const handleResetNominal = () => {
     setCurrentScenario("microgravity");
     addLog("SUCCESS", `Sistemas estabilizados a condiciones NOMINALES para toda la tripulación.`);
-    
+
     setTelemetryHistory(prev => {
       const next = {};
       Object.keys(astronauts).forEach(id => {
@@ -347,8 +356,17 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060913] text-[#F8FAFC] flex flex-row font-sans overflow-x-hidden">
-      
+    <div className="relative flex min-h-screen w-full overflow-x-hidden text-slate-100">
+      {/* Ambient console backdrop */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(820px 480px at 76% -8%, rgba(34,211,238,0.08), transparent 62%), radial-gradient(720px 420px at 12% 104%, rgba(96,165,250,0.05), transparent 65%)',
+        }}
+      />
+
       {/* Sidebar de navegación */}
       <Sidebar
         activeModule={activeModule}
@@ -368,14 +386,16 @@ export default function App() {
       />
 
       {/* Área Principal */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
+      <div className="relative z-10 flex min-h-screen min-w-0 flex-1 flex-col">
+
         {/* Header Superior */}
         <Header
           missionId="mars_001"
+          activeModuleLabel={MODULE_LABELS[activeModule]}
           onOpenJson={() => setIsJsonModalOpen(true)}
           onOpenDictionary={() => setIsDictionaryOpen(true)}
           hasAlert={activeAlerts.length > 0}
+          alertCount={activeAlerts.length}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           mobileMenuOpen={mobileMenuOpen}
@@ -383,83 +403,104 @@ export default function App() {
         />
 
         {/* Módulo Activo */}
-        <main className="flex-1 w-full px-4 sm:px-6 py-3.5 space-y-3.5">
-          
-          {activeModule === 'general' && (
-            <GeneralDashboard
-              missionId="mars_001"
-              astronauts={astronauts}
-              selectedAstronautId={selectedAstronautId}
-              setSelectedAstronautId={setSelectedAstronautId}
-              latestVitalsByAstronaut={latestVitalsByAstronaut}
-              activeAlerts={activeAlerts}
-              environmentalData={environmentalData}
-              currentScenario={currentScenario}
-              setActiveModule={setActiveModule}
-              onResetNominal={handleResetNominal}
-            />
-          )}
+        <main className="flex-1 w-full">
+          <div className="mx-auto w-full max-w-[1680px] px-3.5 pb-5 pt-4 sm:px-5 sm:pt-5 lg:px-6">
+            <div key={activeModule} className="animate-slide-up">
 
-          {activeModule === 'telemetry' && (
-            <BiomedicalTelemetry
-              astronauts={astronauts}
-              selectedAstronautId={selectedAstronautId}
-              setSelectedAstronautId={setSelectedAstronautId}
-              latestVitalsByAstronaut={latestVitalsByAstronaut}
-              currentHistory={currentHistory}
-              latestSample={latestSample}
-              prevSample={prevSample}
-              hrEval={hrEval}
-              spo2Eval={spo2Eval}
-              tempEval={tempEval}
-              rrEval={rrEval}
-              soundEnabled={soundEnabled}
-              hasGlobalAlert={hasGlobalAlert}
-            />
-          )}
+              {activeModule === 'general' && (
+                <GeneralDashboard
+                  missionId="mars_001"
+                  astronauts={astronauts}
+                  selectedAstronautId={selectedAstronautId}
+                  setSelectedAstronautId={setSelectedAstronautId}
+                  latestVitalsByAstronaut={latestVitalsByAstronaut}
+                  activeAlerts={activeAlerts}
+                  environmentalData={environmentalData}
+                  currentScenario={currentScenario}
+                  setActiveModule={setActiveModule}
+                  onResetNominal={handleResetNominal}
+                />
+              )}
 
-          {activeModule === 'simulator' && (
-            <MissionSimulator
-              currentScenario={currentScenario}
-              handleSelectScenario={handleSelectScenario}
-              isAutoSimulating={isAutoSimulating}
-              setIsAutoSimulating={setIsAutoSimulating}
-              handleTick={handleTick}
-              handleTriggerEmergency={handleTriggerEmergency}
-              handleResetNominal={handleResetNominal}
-              environmentalData={environmentalData}
-              logs={logs}
-              astronauts={astronauts}
-              selectedAstronautId={selectedAstronautId}
-            />
-          )}
+              {activeModule === 'telemetry' && (
+                <BiomedicalTelemetry
+                  astronauts={astronauts}
+                  selectedAstronautId={selectedAstronautId}
+                  setSelectedAstronautId={setSelectedAstronautId}
+                  latestVitalsByAstronaut={latestVitalsByAstronaut}
+                  currentHistory={currentHistory}
+                  latestSample={latestSample}
+                  prevSample={prevSample}
+                  hrEval={hrEval}
+                  spo2Eval={spo2Eval}
+                  tempEval={tempEval}
+                  rrEval={rrEval}
+                  soundEnabled={soundEnabled}
+                  hasGlobalAlert={hasGlobalAlert}
+                  currentScenario={currentScenario}
+                />
+              )}
 
-          {activeModule === 'alerts' && (
-            <AlertManagement
-              activeAlerts={activeAlerts}
-              onApplyCountermeasure={handleApplyCountermeasure}
-              onResetNominal={handleResetNominal}
-              onTriggerEmergency={handleTriggerEmergency}
-              astronauts={astronauts}
-            />
-          )}
+              {activeModule === 'simulator' && (
+                <MissionSimulator
+                  currentScenario={currentScenario}
+                  handleSelectScenario={handleSelectScenario}
+                  isAutoSimulating={isAutoSimulating}
+                  setIsAutoSimulating={setIsAutoSimulating}
+                  handleTick={handleTick}
+                  handleTriggerEmergency={handleTriggerEmergency}
+                  handleResetNominal={handleResetNominal}
+                  environmentalData={environmentalData}
+                  logs={logs}
+                  astronauts={astronauts}
+                  selectedAstronautId={selectedAstronautId}
+                />
+              )}
 
-          {activeModule === 'integration' && (
-            <DataIntegration
-              currentJsonPacket={currentJsonPacket}
-              logs={logs}
-              selectedAstronautId={selectedAstronautId}
-              astronauts={astronauts}
-            />
-          )}
+              {activeModule === 'alerts' && (
+                <AlertManagement
+                  activeAlerts={activeAlerts}
+                  onApplyCountermeasure={handleApplyCountermeasure}
+                  onResetNominal={handleResetNominal}
+                  onTriggerEmergency={handleTriggerEmergency}
+                  astronauts={astronauts}
+                />
+              )}
 
+              {activeModule === 'integration' && (
+                <DataIntegration
+                  currentJsonPacket={currentJsonPacket}
+                  logs={logs}
+                  selectedAstronautId={selectedAstronautId}
+                  astronauts={astronauts}
+                />
+              )}
+
+            </div>
+          </div>
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-space-700 bg-space-950 py-2.5 px-4 text-center text-xs font-mono text-slate-400">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto">
-            <span>NASA Space Apps Challenge • AeroHealth Bio-Telemetry Platform</span>
-            <span>Orion MCC-H Mission Control • React 18 + Vite + Tailwind CSS</span>
+        <footer className="mt-auto border-t border-space-800/80 bg-space-950/55">
+          <div className="mx-auto flex w-full max-w-[1680px] flex-col items-center justify-between gap-2 px-4 py-3 text-center font-mono text-[10px] text-slate-500 sm:flex-row sm:px-6 sm:text-left">
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <Radio className="h-3 w-3 text-telemetry-green" aria-hidden="true" />
+                NASA Space Apps Challenge
+              </span>
+              <span className="text-slate-700">/</span>
+              <span>AeroHealth Bio-Telemetry Platform</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-end">
+              <span>ORION MCC-H</span>
+              <span className="text-slate-700">/</span>
+              <span>REACT 18 · VITE · TAILWIND</span>
+              <span className="text-slate-700">/</span>
+              <span className="flex items-center gap-1.5 text-telemetry-green">
+                <span className="h-1.5 w-1.5 rounded-full bg-telemetry-green" />
+                BUILD 1.0.0
+              </span>
+            </div>
           </div>
         </footer>
 
