@@ -1,0 +1,94 @@
+{
+  "scenarios": {
+    "microgravity": {
+      "id": "microgravity",
+      "name": "Microgravedad Estándar (Nominal)",
+      "description": "Condición basal en órbita estable dentro del hábitat presurizado.",
+      "environment": {
+        "ambient_pressure_kpa": 101.3,
+        "o2_percentage": 21.0,
+        "co2_mmhg": 3.1,
+        "radiation_usvh": 18.2,
+        "suit_pressure_kpa": 29.6
+      },
+      "expected_ranges": {
+        "heart_rate": { "min": 65, "max": 85, "unit": "bpm" },
+        "spo2": { "min": 97.0, "max": 99.5, "unit": "%" },
+        "temperature": { "min": 36.4, "max": 36.8, "unit": "°C" },
+        "respiratory_rate": { "min": 13, "max": 17, "unit": "rpm" }
+      }
+    },
+    "eva": {
+      "id": "eva",
+      "name": "Actividad Extravehicular (Paseo Espacial)",
+      "description": "Salida fuera de la nave con traje espacial presurizado a 29.6 kPa y alto gasto metabólico.",
+      "environment": {
+        "ambient_pressure_kpa": 0.0,
+        "o2_percentage": 100.0,
+        "co2_mmhg": 4.5,
+        "radiation_usvh": 32.5,
+        "suit_pressure_kpa": 29.6
+      },
+      "expected_ranges": {
+        "heart_rate": { "min": 98, "max": 115, "unit": "bpm" },
+        "spo2": { "min": 95.5, "max": 97.5, "unit": "%" },
+        "temperature": { "min": 36.9, "max": 37.4, "unit": "°C" },
+        "respiratory_rate": { "min": 19, "max": 23, "unit": "rpm" }
+      }
+    },
+    "hypoxia": {
+      "id": "hypoxia",
+      "name": "Alerta de Hipoxia (Despresurización Parcial)",
+      "description": "Pérdida súbita de presión de escafandra por microperforación o fuga de O2.",
+      "environment": {
+        "ambient_pressure_kpa": 0.0,
+        "o2_percentage": 75.0,
+        "co2_mmhg": 5.8,
+        "radiation_usvh": 33.0,
+        "suit_pressure_kpa": 22.1
+      },
+      "expected_ranges": {
+        "heart_rate": { "min": 125, "max": 145, "unit": "bpm" },
+        "spo2": { "min": 82.0, "max": 89.0, "unit": "%" },
+        "temperature": { "min": 36.2, "max": 36.6, "unit": "°C" },
+        "respiratory_rate": { "min": 25, "max": 31, "unit": "rpm" }
+      }
+    },
+    "hyperthermia": {
+      "id": "hyperthermia",
+      "name": "Estrés Térmico / Fallo LCVG",
+      "description": "Fallo de circulación de agua helada en la prenda LCVG bajo radiación solar directa.",
+      "environment": {
+        "ambient_pressure_kpa": 0.0,
+        "o2_percentage": 100.0,
+        "co2_mmhg": 4.8,
+        "radiation_usvh": 34.0,
+        "suit_pressure_kpa": 29.6
+      },
+      "expected_ranges": {
+        "heart_rate": { "min": 112, "max": 128, "unit": "bpm" },
+        "spo2": { "min": 95.0, "max": 97.0, "unit": "%" },
+        "temperature": { "min": 38.1, "max": 39.2, "unit": "°C" },
+        "respiratory_rate": { "min": 21, "max": 25, "unit": "rpm" }
+      }
+    },
+    "sleep": {
+      "id": "sleep",
+      "name": "Ciclo de Sueño y Reposo",
+      "description": "Fase de descanso biológico en los camarotes de la estación.",
+      "environment": {
+        "ambient_pressure_kpa": 101.3,
+        "o2_percentage": 21.0,
+        "co2_mmhg": 2.8,
+        "radiation_usvh": 18.0,
+        "suit_pressure_kpa": 0.0
+      },
+      "expected_ranges": {
+        "heart_rate": { "min": 52, "max": 62, "unit": "bpm" },
+        "spo2": { "min": 98.0, "max": 99.8, "unit": "%" },
+        "temperature": { "min": 36.1, "max": 36.4, "unit": "°C" },
+        "respiratory_rate": { "min": 10, "max": 13, "unit": "rpm" }
+      }
+    }
+  }
+}

@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primitive Tokens */
+    --space-void: #050811;
+    --space-surface: #0B1220;
+    --space-card: #0F172A;
+    --space-highlight: #162238;
+    --space-border: #1E293B;
+    --space-border-focus: #00E5FF;
+    
+    /* Semantic Tokens */
+    --color-bg: var(--space-void);
+    --color-surface: var(--space-surface);
+    --color-card: var(--space-card);
+    --color-border: var(--space-border);
+    --color-cyan: #00E5FF;
+    --color-blue: #38BDF8;
+    --color-green: #10B981;
+    --color-amber: #F59E0B;
+    --color-crimson: #EF4444;
+
+    /* Density Scale (9/10 - Dashboard) */
+    --space-xs: 2px;
+    --space-sm: 4px;
+    --space-md: 8px;
+    --space-lg: 12px;
+    --space-xl: 16px;
+    --space-2xl: 20px;
+  }
+
+  body {
+    background-color: #050811;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.04) 0%, transparent 60%),
+      linear-gradient(rgba(56, 189, 248, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
+    color: #F8FAFC;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Aerospace Technical HUD Panels */
+.hud-panel {
+  background: rgba(11, 18, 32, 0.92);
+  border: 1px solid rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.hud-panel:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.hud-panel-active {
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 16px -3px rgba(0, 229, 255, 0.18);
+}
+
+.hud-panel-danger {
+  background: rgba(28, 12, 18, 0.96);
+  border: 1px solid rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 18px -3px rgba(239, 68, 68, 0.28);
+}
+
+.hud-panel-warning {
+  background: rgba(28, 20, 10, 0.96);
+  border: 1px solid rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 18px -3px rgba(245, 158, 11, 0.22);
+}
+
+/* Technical Corner Markings */
+.hud-corner {
+  position: relative;
+}
+.hud-corner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid rgba(0, 229, 255, 0.7);
+  border-left: 1.5px solid rgba(0, 229, 255, 0.7);
+  pointer-events: none;
+}
+.hud-corner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  border-bottom: 1.5px solid rgba(0, 229, 255, 0.7);
+  border-right: 1.5px solid rgba(0, 229, 255, 0.7);
+  pointer-events: none;
+}
+
+/* High Contrast Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #050811;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5FF;
+}
+
+/* Accessibility Focus Visible */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
