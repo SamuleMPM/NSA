@@ -3,11 +3,13 @@ import React from 'react';
 const VARIANTS = {
   nominal: 'pill-green',
   warning: 'pill-amber',
+  high: 'pill-high',
   critical: 'pill-red',
   emergency: 'pill-emergency',
   info: 'pill-cyan',
   accent: 'pill-cyan',
   violet: 'pill-violet',
+  simulated: 'pill-violet',
   neutral: '',
 };
 

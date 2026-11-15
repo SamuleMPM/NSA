@@ -11,20 +11,20 @@ export default function ModuleHeader({
   className = '',
 }) {
   return (
-    <header className={`panel hud-corner overflow-hidden ${className}`}>
+    <header className={`panel overflow-hidden ${className}`}>
       <div className="relative flex flex-col gap-4 px-4 py-4 sm:px-5 sm:py-4 xl:flex-row xl:items-center xl:justify-between">
         <div
-          className="pointer-events-none absolute inset-y-0 left-0 w-40 opacity-70"
+          className="pointer-events-none absolute inset-y-0 left-0 w-48 opacity-60"
           style={{
             background:
-              'radial-gradient(120px 90px at 0% 50%, rgba(34,211,238,0.16), transparent 70%)',
+              'linear-gradient(90deg, rgba(29, 78, 216, 0.06), transparent 70%)',
           }}
           aria-hidden="true"
         />
 
         <div className="relative flex min-w-0 items-start gap-3.5">
           {Icon ? (
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-400/[0.07] text-telemetry-cyan shadow-hud-glow">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8] shadow-co-sm">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
           ) : null}
@@ -36,11 +36,11 @@ export default function ModuleHeader({
               ) : null}
               <span className="eyebrow">{kicker}</span>
             </div>
-            <h1 className="font-heading text-[19px] font-extrabold leading-tight tracking-tight text-white sm:text-[23px]">
+            <h1 className="font-heading text-[19px] font-extrabold leading-tight tracking-tight text-[#1D4ED8] sm:text-[23px]">
               {title}
             </h1>
             {description ? (
-              <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-slate-400">
+              <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-[#47598A]">
                 {description}
               </p>
             ) : null}

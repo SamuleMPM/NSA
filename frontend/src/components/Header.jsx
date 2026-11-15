@@ -11,20 +11,20 @@ const CONNECTION_STATES = {
   online: {
     label: 'API · SQLite',
     title: 'Persistencia remota activa: los registros se guardan en la base de datos.',
-    className: 'border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-200',
-    dot: 'bg-emerald-400 shadow-[0_0_8px_#34D399]',
+    className: 'border-white/30 bg-white/15 text-white',
+    dot: 'bg-emerald-300 shadow-none',
   },
   connecting: {
     label: 'Conectando…',
     title: 'Estableciendo enlace con la API AeroHealth.',
-    className: 'border-cyan-400/25 bg-cyan-400/[0.06] text-cyan-200',
-    dot: 'animate-pulse bg-telemetry-cyan shadow-[0_0_8px_#22D3EE]',
+    className: 'border-white/30 bg-white/15 text-white',
+    dot: 'animate-pulse bg-white shadow-none',
   },
   offline: {
     label: 'Modo local',
     title: 'API no disponible. Los datos se guardan en localStorage y se reintentará la sincronización.',
-    className: 'border-amber-400/30 bg-amber-400/[0.07] text-amber-200',
-    dot: 'bg-amber-400 shadow-[0_0_8px_#FBBF24]',
+    className: 'border-white/30 bg-white/15 text-white',
+    dot: 'bg-amber-300 shadow-none',
   },
 };
 
@@ -35,25 +35,25 @@ export default function Header({
   const connection = CONNECTION_STATES[backendStatus] || CONNECTION_STATES.connecting;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-space-800/80 bg-space-950/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-[#C9D9F5]/30 bg-gradient-to-r from-[#1D4ED8] to-[#0EA5E9] text-white shadow-sm">
       <div className="mx-auto flex h-[60px] w-full max-w-[1680px] items-center justify-between gap-4 px-4 sm:px-6">
         {/* Logo + nombre del sistema */}
         <div className="flex min-w-0 items-center gap-3">
-          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-400/30 bg-cyan-400/[0.07] text-telemetry-cyan shadow-[0_0_22px_-8px_rgba(34,211,238,0.75)]">
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/30 bg-white/15 text-white shadow-none">
             <Orbit className="h-[18px] w-[18px]" aria-hidden="true" />
-            <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-telemetry-green shadow-[0_0_8px_#34D399]" />
+            <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-emerald-300" />
           </span>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
               <span className="truncate font-heading text-[15px] font-extrabold tracking-[0.08em] text-white">
                 AEROHEALTH
               </span>
-              <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:block" />
-              <span className="mono hidden text-[9px] uppercase tracking-[0.16em] text-telemetry-cyan/80 sm:block">
+              <span className="hidden h-1 w-1 rounded-full bg-white/40 sm:block" />
+              <span className="mono hidden text-[9px] uppercase tracking-[0.16em] text-white/90 sm:block">
                 NASA HRP
               </span>
             </div>
-            <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-slate-500">
+            <span className="mono block truncate text-[9.5px] uppercase tracking-[0.12em] text-white/80">
               Sistema de monitorización biomédica espacial
             </span>
           </div>
@@ -69,12 +69,12 @@ export default function Header({
             {connection.label}
           </span>
           <span className="hidden text-right sm:block">
-            <span className="mono block text-[8.5px] uppercase tracking-[0.14em] text-slate-500">Sesión activa</span>
-            <span className="block font-heading text-[12px] font-bold leading-tight text-slate-200">{user.name}</span>
-            <span className="mono block text-[9px] text-slate-500">{user.role} · MCC-H</span>
+            <span className="mono block text-[8.5px] uppercase tracking-[0.14em] text-white/75">Sesión activa</span>
+            <span className="block font-heading text-[12px] font-bold leading-tight text-white">{user.name}</span>
+            <span className="mono block text-[9px] text-white/80">{user.role} · MCC-H</span>
           </span>
           <span
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-400/30 bg-gradient-to-br from-cyan-400/20 to-blue-500/10 font-heading text-[10px] font-extrabold tracking-wide text-cyan-100"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/20 font-heading text-[10px] font-extrabold tracking-wide text-white"
             title={`${user.name} · ${user.role}`}
             aria-label={`Usuario conectado: ${user.name}, ${user.role}`}
           >

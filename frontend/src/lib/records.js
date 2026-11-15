@@ -40,7 +40,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos del astronauta',
     short: 'Astronauta',
     iconName: 'astronaut',
-    color: '#60A5FA',
+    color: '#1D4ED8',
     description: 'Identificación, demografía, rol y contexto de misión del tripulante.',
   },
   {
@@ -48,7 +48,7 @@ export const RECORD_CATEGORIES = [
     label: 'Signos vitales',
     short: 'Vitales',
     iconName: 'vitals',
-    color: '#FB7185',
+    color: '#0EA5E9',
     description: 'Frecuencia cardíaca, SpO₂, temperatura y frecuencia respiratoria.',
   },
   {
@@ -56,7 +56,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos de telemetría',
     short: 'Telemetría',
     iconName: 'telemetry',
-    color: '#22D3EE',
+    color: '#1E40AF',
     description: 'Calidad de señal, HRV, fuente y frecuencia de muestreo biomédico.',
   },
   {
@@ -64,7 +64,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos del ECG',
     short: 'ECG',
     iconName: 'ecg',
-    color: '#A78BFA',
+    color: '#2563EB',
     description: 'Ritmo, intervalos y interpretación electrocardiográfica.',
   },
   {
@@ -72,7 +72,7 @@ export const RECORD_CATEGORIES = [
     label: 'Entorno espacial',
     short: 'Entorno',
     iconName: 'environment',
-    color: '#34D399',
+    color: '#047857',
     description: 'O₂, CO₂, presión, temperatura, humedad, calidad de aire y radiación.',
   },
   {
@@ -80,7 +80,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos de simulación',
     short: 'Simulación',
     iconName: 'simulation',
-    color: '#FBBF24',
+    color: '#6D28D9',
     description: 'Escenario, condiciones iniciales, variables RIDGE y resultados de la prueba.',
   },
 ];

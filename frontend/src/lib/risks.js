@@ -15,10 +15,10 @@ import { clamp } from './format';
 export const RISK_ORDER = ['radiation', 'isolation', 'distance', 'gravity', 'environment'];
 
 export const RISK_LEVELS = {
-  low: { id: 'low', label: 'Bajo', short: 'BAJO', color: '#34D399', tone: 'nominal', order: 0 },
-  moderate: { id: 'moderate', label: 'Moderado', short: 'MOD', color: '#FBBF24', tone: 'warning', order: 1 },
-  high: { id: 'high', label: 'Alto', short: 'ALTO', color: '#FB923C', tone: 'warning', order: 2 },
-  critical: { id: 'critical', label: 'Crítico', short: 'CRÍT', color: '#FB7185', tone: 'critical', order: 3 },
+  low: { id: 'low', label: 'Bajo', short: 'BAJO', color: '#047857', tone: 'nominal', order: 0 },
+  moderate: { id: 'moderate', label: 'Moderado', short: 'MOD', color: '#0369A1', tone: 'warning', order: 1 },
+  high: { id: 'high', label: 'Alto', short: 'ALTO', color: '#C2410C', tone: 'high', order: 2 },
+  critical: { id: 'critical', label: 'Crítico', short: 'CRÍT', color: '#A16207', tone: 'critical', order: 3 },
 };
 
 export const RISK_MODEL_NOTE =
@@ -126,7 +126,7 @@ export const RISK_DEFINITIONS = {
     name: 'Radiación espacial',
     shortName: 'Radiación',
     icon: 'radiation',
-    color: '#FBBF24',
+    color: '#1E40AF',
     summary: 'Exposición a rayos cósmicos galácticos (GCR) y eventos de partículas solares (SPE).',
     threat: 'Sin magnetosfera terrestre, la radiación ionizante de alta energía puede dañar el ADN, aumentar el riesgo de cáncer y cataratas y alterar la respuesta inmunitaria.',
     dataSource: 'Dosímetro ambiental y personal (no conectado). Valores de entorno simulados o registro manual.',
@@ -152,7 +152,7 @@ export const RISK_DEFINITIONS = {
     name: 'Aislamiento y confinamiento',
     shortName: 'Aislamiento',
     icon: 'isolation',
-    color: '#A78BFA',
+    color: '#0EA5E9',
     summary: 'Convivencia prolongada en volumen reducido, lejos del entorno social terrestre.',
     threat: 'Puede alterar el ritmo circadiano, el sueño, el estado de ánimo, la atención y la convivencia, con riesgo de depresión reactiva y deterioro del rendimiento.',
     dataSource: 'Cuestionarios de bienestar y registro de sueño. Sueño y estrés pueden venir de telemetría; contactos y estado de ánimo son registros manuales.',
@@ -179,7 +179,7 @@ export const RISK_DEFINITIONS = {
     name: 'Distancia de la Tierra',
     shortName: 'Distancia',
     icon: 'distance',
-    color: '#38BDF8',
+    color: '#1D4ED8',
     summary: 'Retardo de comunicaciones y ausencia de evacuación o telemedicina en tiempo real.',
     threat: 'Cuanto mayor es la distancia, mayor es la latencia y menor la capacidad de recibir ayuda. La tripulación debe diagnosticar y tratar de forma autónoma.',
     dataSource: 'Efemérides de misión y latencia DSN (no conectadas). Parámetros de entorno simulados o registros manuales.',
@@ -206,7 +206,7 @@ export const RISK_DEFINITIONS = {
     name: 'Campos gravitatorios alterados',
     shortName: 'Gravedad',
     icon: 'gravity',
-    color: '#22D3EE',
+    color: '#2563EB',
     summary: 'Transición entre 1 G, microgravedad, gravedad lunar/marciana y aceleraciones de lanzamiento/reentrada.',
     threat: 'Desacondicionamiento cardiovascular y musculoesquelético, pérdida de densidad ósea, atrofia muscular, desplazamiento cefálico de fluidos y SANS.',
     dataSource: 'Acelerómetro/IMU y ecografía muscular (no conectados). Gravedad del entorno simulada; pérdida ósea estimada por modelo o registro manual.',
@@ -233,7 +233,7 @@ export const RISK_DEFINITIONS = {
     name: 'Entornos cerrados y hostiles',
     shortName: 'Entorno',
     icon: 'environment',
-    color: '#34D399',
+    color: '#0284C7',
     summary: 'Hábitat hermético con aire, agua y residuos reciclados; polvo, gases y variaciones térmicas.',
     threat: 'Hipoxia, hipercapnia, deshidratación, estrés térmico, irritación por regolito y alteraciones de la microbiota.',
     dataSource: 'Sensores ECLSS de O₂, CO₂, presión, temperatura y humedad (no conectados). Datos simulados o registros manuales.',

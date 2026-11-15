@@ -81,14 +81,11 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
     let lastBeepTime = 0;
 
     const drawGrid = () => {
-      const bg = ctx.createLinearGradient(0, 0, 0, height);
-      bg.addColorStop(0, '#06101B');
-      bg.addColorStop(1, '#040A12');
-      ctx.fillStyle = bg;
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
 
-      // Cuadrícula fina (0.04 s / 0.1 mV)
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.055)';
+      // Cuadrícula fina (0.04 s / 0.1 mV) — Clean Orbit
+      ctx.strokeStyle = 'rgba(201, 217, 245, 0.5)';
       ctx.lineWidth = 0.5;
       for (let gx = 0; gx < width; gx += 8) {
         ctx.beginPath();
@@ -103,8 +100,8 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
         ctx.stroke();
       }
 
-      // Cuadrícula mayor (0.20 s / 0.5 mV)
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.13)';
+      // Cuadrícula mayor (0.20 s / 0.5 mV) — Clean Orbit
+      ctx.strokeStyle = '#C9D9F5';
       ctx.lineWidth = 0.75;
       for (let gx = 0; gx < width; gx += 40) {
         ctx.beginPath();
@@ -120,7 +117,7 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
       }
 
       // Baseline
-      ctx.strokeStyle = 'rgba(34, 211, 238, 0.12)';
+      ctx.strokeStyle = 'rgba(29, 78, 216, 0.18)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, height / 2);
@@ -158,10 +155,10 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
 
       // Haz de barrido: limpia y redibuja la cuadrícula local
       const scanBarWidth = 26;
-      ctx.fillStyle = '#050C15';
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(x, 0, scanBarWidth, height);
 
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+      ctx.strokeStyle = 'rgba(201, 217, 245, 0.5)';
       ctx.lineWidth = 0.5;
       for (let gx = Math.floor(x / 8) * 8; gx <= x + scanBarWidth; gx += 8) {
         ctx.beginPath();
@@ -176,28 +173,26 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
         ctx.stroke();
       }
 
-      // Barrido luminoso
+      // Barrido limpio Clean Orbit
       const sweep = ctx.createLinearGradient(x, 0, x + scanBarWidth, 0);
-      sweep.addColorStop(0, 'rgba(34, 211, 238, 0)');
-      sweep.addColorStop(0.75, 'rgba(34, 211, 238, 0.035)');
-      sweep.addColorStop(1, 'rgba(34, 211, 238, 0.16)');
+      sweep.addColorStop(0, 'rgba(29, 78, 216, 0)');
+      sweep.addColorStop(0.75, 'rgba(29, 78, 216, 0.04)');
+      sweep.addColorStop(1, 'rgba(29, 78, 216, 0.12)');
       ctx.fillStyle = sweep;
       ctx.fillRect(x, 0, scanBarWidth, height);
 
       const ecgVal = getECGValue(cyclePhase);
       const newY = height / 2 - ecgVal * (height * 0.46);
-      const stroke = activeAlert ? '#FB7185' : '#22D3EE';
+      const stroke = activeAlert ? '#E11D48' : '#1D4ED8';
 
       ctx.beginPath();
       ctx.moveTo(x, lastY);
       ctx.lineTo(x + speed, newY);
       ctx.strokeStyle = stroke;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 2.0;
       ctx.lineCap = 'round';
-      ctx.shadowColor = activeAlert ? 'rgba(251, 113, 133, 0.8)' : 'rgba(34, 211, 238, 0.8)';
-      ctx.shadowBlur = 7;
-      ctx.stroke();
       ctx.shadowBlur = 0;
+      ctx.stroke();
 
       lastY = newY;
       x += speed;
@@ -220,14 +215,14 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
 
   return (
     <section className="panel overflow-hidden">
-      <div className="flex flex-col gap-2 border-b border-space-700/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 border-b border-[#C9D9F5] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
-          <span className={`flex h-7 w-7 items-center justify-center rounded-md border ${isAlert ? 'border-rose-400/30 bg-rose-400/[0.08] text-rose-300' : 'border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan'}`}>
+          <span className={`flex h-7 w-7 items-center justify-center rounded-md border ${isAlert ? 'border-[#FECDD3] bg-[#FFF5F6] text-[#E11D48]' : 'border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]'}`}>
             <Activity className={`h-3.5 w-3.5 ${isAlert ? 'animate-pulse' : ''}`} aria-hidden="true" />
           </span>
           <div>
             <span className="eyebrow block">CONTINUOUS TELEMETRY / LEAD II</span>
-            <h3 className="font-heading text-[13px] font-bold text-slate-100">
+            <h3 className="font-heading text-[13px] font-bold text-[#1D4ED8]">
               Osciloscopio electrocardiográfico
             </h3>
           </div>
@@ -237,34 +232,33 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
           <span className="pill">25 mm/s</span>
           <span className="pill">10 mm/mV</span>
           <span className="pill">0.05–150 Hz</span>
-          <StatusPill status={isAlert ? 'critical' : 'nominal'}>
+          <StatusPill status={isAlert ? 'emergency' : 'nominal'}>
             {isAlert ? 'ARRITMIA / ALERTA' : 'RITMO SINUSAL'}
           </StatusPill>
         </div>
       </div>
 
       <div className="grid gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_180px]">
-        <div className="relative overflow-hidden rounded-md border border-space-700/80 bg-[#040A12]">
+        <div className="relative overflow-hidden rounded-md border border-[#C9D9F5] bg-white shadow-co-sm">
           <div className="relative h-[172px] w-full sm:h-[188px]">
             <canvas ref={canvasRef} className="block h-full w-full" aria-label="Onda ECG continua Lead II" role="img" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#040A12]/35" />
 
             <div className="pointer-events-none absolute left-2.5 top-2 flex items-center gap-2">
-              <span className="mono rounded border border-cyan-400/20 bg-space-950/70 px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-cyan-300">
+              <span className="mono rounded border border-[#C9D9F5] bg-[#DBEAFE] px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-[#1D4ED8]">
                 LEAD II
               </span>
-              <span className="mono text-[8px] tracking-widest text-slate-600">P-Q-R-S-T</span>
+              <span className="mono text-[8px] tracking-widest text-[#47598A]">P-Q-R-S-T</span>
             </div>
 
-            <div className="pointer-events-none absolute bottom-2 left-2.5 flex items-center gap-2 font-mono text-[8px] text-slate-600">
+            <div className="pointer-events-none absolute bottom-2 left-2.5 flex items-center gap-2 font-mono text-[8px] text-[#47598A]">
               <span>25 mm/s</span>
-              <span className="h-2 w-px bg-slate-700" />
+              <span className="h-2 w-px bg-[#C9D9F5]" />
               <span>10 mm/mV</span>
             </div>
 
             <div className="pointer-events-none absolute right-2.5 top-2 flex items-center gap-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${isAlert ? 'bg-rose-400' : 'bg-cyan-400'} animate-pulse`} />
-              <span className={`mono text-[8px] font-bold tracking-widest ${isAlert ? 'text-rose-300' : 'text-cyan-300'}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${isAlert ? 'bg-[#E11D48]' : 'bg-[#1D4ED8]'} animate-pulse`} />
+              <span className={`mono text-[8px] font-bold tracking-widest ${isAlert ? 'text-[#E11D48]' : 'text-[#1D4ED8]'}`}>
                 LIVE
               </span>
             </div>
@@ -275,42 +269,42 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
           <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
             <div>
               <span className="eyebrow block">HEART RATE</span>
-              <span className="value-md text-slate-100">{safeHeartRate}</span>
+              <span className="value-md text-[#0B1B3A]">{safeHeartRate}</span>
             </div>
-            <span className="mono text-[9px] text-slate-500">BPM</span>
+            <span className="mono text-[9px] text-[#47598A]">BPM</span>
           </div>
 
           <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
             <div>
               <span className="eyebrow block">RHYTHM</span>
-              <span className={`mono text-[10px] font-bold ${isAlert ? 'text-rose-300' : 'text-emerald-300'}`}>
+              <span className={`mono text-[10px] font-bold ${isAlert ? 'text-[#E11D48]' : 'text-[#047857]'}`}>
                 {isAlert ? 'IRREGULAR' : 'SINUS'}
               </span>
             </div>
             {isAlert ? (
-              <ShieldAlert className="h-3.5 w-3.5 text-rose-300" aria-hidden="true" />
+              <ShieldAlert className="h-3.5 w-3.5 text-[#E11D48]" aria-hidden="true" />
             ) : (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#047857]" aria-hidden="true" />
             )}
           </div>
 
           <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
             <div>
               <span className="eyebrow block">SIGNAL</span>
-              <span className="mono text-[10px] font-bold text-cyan-300">2.1 kΩ</span>
+              <span className="mono text-[10px] font-bold text-[#1D4ED8]">2.1 kΩ</span>
             </div>
-            <Waves className="h-3.5 w-3.5 text-telemetry-cyan" aria-hidden="true" />
+            <Waves className="h-3.5 w-3.5 text-[#0EA5E9]" aria-hidden="true" />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-space-700/60 px-4 py-2 font-mono text-[9px] text-slate-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#C9D9F5] px-4 py-2 font-mono text-[9px] text-[#47598A]">
         <span className="flex items-center gap-1.5">
-          <Zap className="h-3 w-3 text-telemetry-cyan" aria-hidden="true" />
+          <Zap className="h-3 w-3 text-[#1D4ED8]" aria-hidden="true" />
           FILTRO DIGITAL ACTIVO · 250 Hz
         </span>
         <span className="flex items-center gap-1.5">
-          <Radio className="h-3 w-3 text-telemetry-green" aria-hidden="true" />
+          <Radio className="h-3 w-3 text-[#047857]" aria-hidden="true" />
           ELECTRODO L-II · IMPEDANCIA NOMINAL
         </span>
       </div>

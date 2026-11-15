@@ -12,11 +12,11 @@
  */
 
 export const SEVERITY_LEVELS = {
-  normal: { id: 'normal', label: 'Nominal', order: 0, tone: 'nominal', color: '#34D399' },
-  info: { id: 'info', label: 'Informativa', order: 1, tone: 'info', color: '#22D3EE' },
-  warning: { id: 'warning', label: 'Advertencia', order: 2, tone: 'warning', color: '#FBBF24' },
-  critical: { id: 'critical', label: 'Crítica', order: 3, tone: 'critical', color: '#FB7185' },
-  emergency: { id: 'emergency', label: 'Emergencia', order: 4, tone: 'emergency', color: '#F43F5E' },
+  normal: { id: 'normal', label: 'Nominal', order: 0, tone: 'nominal', color: '#047857' },
+  info: { id: 'info', label: 'Informativa', order: 1, tone: 'info', color: '#0EA5E9' },
+  warning: { id: 'warning', label: 'Advertencia', order: 2, tone: 'warning', color: '#0369A1' },
+  critical: { id: 'critical', label: 'Crítica', order: 3, tone: 'critical', color: '#A16207' },
+  emergency: { id: 'emergency', label: 'Emergencia', order: 4, tone: 'emergency', color: '#E11D48' },
 };
 
 export const ALERTABLE_VITALS = ['heart_rate', 'spo2', 'temperature', 'respiratory_rate'];

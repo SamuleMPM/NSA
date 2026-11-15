@@ -60,14 +60,14 @@ export default function AlertCard({
       <div
         className={`flex items-center gap-2.5 rounded-md border px-2.5 py-2 ${
           alert.status === 'resolved'
-            ? 'border-space-700/60 bg-space-900/30 opacity-70'
+            ? 'border-[#C9D9F5] bg-[#F8FAFD] opacity-75'
             : alert.severity === 'emergency'
-              ? 'border-rose-500/35 bg-rose-500/[0.06]'
+              ? 'border-[#FDA4AF] bg-[#FFF5F6]'
               : alert.severity === 'critical'
-                ? 'border-rose-400/25 bg-rose-400/[0.045]'
+                ? 'border-[#FDE68A] bg-[#FEF3C7]/40'
                 : alert.severity === 'warning'
-                  ? 'border-amber-400/25 bg-amber-400/[0.04]'
-                  : 'border-cyan-400/20 bg-cyan-400/[0.035]'
+                  ? 'border-[#BAE6FD] bg-[#E0F2FE]/40'
+                  : 'border-[#C9D9F5] bg-white'
         }`}
       >
         <span
@@ -75,14 +75,14 @@ export default function AlertCard({
           style={{
             color: severity.color,
             borderColor: `${severity.color}44`,
-            background: `${severity.color}12`,
+            background: `${severity.color}15`,
           }}
         >
           <SeverityIcon className="h-3.5 w-3.5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <span className="block truncate font-heading text-[11px] font-bold text-slate-200">{alert.title}</span>
-          <span className="mono mt-0.5 block text-[8.5px] text-slate-500">
+          <span className="block truncate font-heading text-[11px] font-bold text-[#0B1B3A]">{alert.title}</span>
+          <span className="mono mt-0.5 block text-[8.5px] text-[#47598A]">
             {alert.parameter} · {alert.value}
             {alert.unit ? ` ${alert.unit}` : ''} · {relativeTime(alert.lastSeenAt || alert.detectedAt)}
           </span>
@@ -98,23 +98,23 @@ export default function AlertCard({
     <article
       className={`panel overflow-hidden ${
         alert.severity === 'emergency'
-          ? 'panel-critical border-rose-500/50'
+          ? 'panel-critical border-[#E11D48]/50'
           : alert.severity === 'critical'
-            ? 'panel-critical'
+            ? 'border-[#FDE68A] bg-[#FEF3C7]/20'
             : alert.severity === 'warning'
               ? 'panel-warning'
               : ''
       }`}
       aria-label={alert.title}
     >
-      <div className="flex flex-col gap-2.5 border-b border-space-700/60 px-3.5 py-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-2.5 border-b border-[#C9D9F5] px-3.5 py-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-2.5">
           <span
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"
             style={{
               color: severity.color,
               borderColor: `${severity.color}4d`,
-              background: `${severity.color}14`,
+              background: `${severity.color}18`,
             }}
           >
             <SeverityIcon className="h-4 w-4" aria-hidden="true" />
@@ -130,10 +130,10 @@ export default function AlertCard({
               </span>
               <DataOriginBadge origin={alert.origin} />
             </div>
-            <h3 className="mt-1.5 font-heading text-[13px] font-bold leading-snug text-slate-100">
+            <h3 className="mt-1.5 font-heading text-[13px] font-bold leading-snug text-[#0B1B3A]">
               {alert.title}
             </h3>
-            <p className="mono mt-0.5 text-[9px] text-slate-500">
+            <p className="mono mt-0.5 text-[9px] text-[#47598A]">
               {alert.astronautName ? `${alert.astronautName} · ` : ''}
               {formatDateTime(alert.detectedAt)}
             </p>
@@ -157,7 +157,7 @@ export default function AlertCard({
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">PARÁMETRO</span>
-            <span className="mt-0.5 block font-heading text-[11.5px] font-bold text-slate-200">
+            <span className="mt-0.5 block font-heading text-[11.5px] font-bold text-[#0B1B3A]">
               {alert.parameter}
             </span>
           </div>
@@ -167,12 +167,12 @@ export default function AlertCard({
               <span className="value-sm" style={{ color: severity.color }}>
                 {alert.value}
               </span>
-              <span className="mono text-[8.5px] text-slate-600">{alert.unit}</span>
+              <span className="mono text-[8.5px] text-[#47598A]">{alert.unit}</span>
             </span>
           </div>
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">RANGO DE REFERENCIA</span>
-            <span className="mt-0.5 block text-[10.5px] leading-snug text-slate-400">
+            <span className="mt-0.5 block text-[10.5px] leading-snug text-[#47598A]">
               {alert.referenceRange || '--'}
             </span>
           </div>
@@ -180,11 +180,11 @@ export default function AlertCard({
 
         <div>
           <span className="eyebrow block">EXPLICACIÓN CLÍNICA</span>
-          <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{alert.explanation}</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-[#0B1B3A]">{alert.explanation}</p>
         </div>
 
         {alert.meta?.rangeDetail ? (
-          <p className="mono text-[8.5px] leading-relaxed text-slate-600">{alert.meta.rangeDetail}</p>
+          <p className="mono text-[8.5px] leading-relaxed text-[#47598A]">{alert.meta.rangeDetail}</p>
         ) : null}
 
         {alert.meta?.indicators?.length ? (
@@ -194,11 +194,11 @@ export default function AlertCard({
               {alert.meta.indicators.map((indicator) => (
                 <div
                   key={indicator.key}
-                  className="flex items-center justify-between gap-2 rounded border border-space-700/60 bg-space-900/35 px-2 py-1"
+                  className="flex items-center justify-between gap-2 rounded border border-[#C9D9F5] bg-[#F8FAFD] px-2 py-1"
                 >
-                  <span className="truncate text-[10px] text-slate-500">{indicator.label}</span>
-                  <span className="mono shrink-0 text-[9px] font-semibold text-slate-300">
-                    {indicator.value} <span className="text-slate-600">{indicator.unit}</span>
+                  <span className="truncate text-[10px] text-[#47598A]">{indicator.label}</span>
+                  <span className="mono shrink-0 text-[9px] font-semibold text-[#0B1B3A]">
+                    {indicator.value} <span className="text-[#47598A]">{indicator.unit}</span>
                   </span>
                 </div>
               ))}
@@ -207,27 +207,27 @@ export default function AlertCard({
         ) : null}
 
         {alert.recommendations?.length ? (
-          <details className="group rounded-md border border-space-700/70 bg-space-900/35">
+          <details className="group rounded-md border border-[#C9D9F5] bg-[#F8FAFD]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2.5 py-2">
-              <span className="mono flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                <ClipboardList className="h-3 w-3 text-telemetry-cyan" aria-hidden="true" />
+              <span className="mono flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#1D4ED8]">
+                <ClipboardList className="h-3 w-3 text-[#1D4ED8]" aria-hidden="true" />
                 Recomendaciones ({alert.recommendations.length})
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-500 transition-transform group-open:rotate-180" aria-hidden="true" />
+              <ChevronDown className="h-3.5 w-3.5 text-[#47598A] transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
-            <ol className="space-y-2 border-t border-space-700/60 px-3 py-2.5">
+            <ol className="space-y-2 border-t border-[#C9D9F5] px-3 py-2.5">
               {alert.recommendations.map((recommendation, index) => (
                 <li key={`${recommendation.title}-${index}`} className="flex gap-2">
-                  <span className="mono mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-space-600 bg-space-800 text-[8px] font-bold text-slate-400">
+                  <span className="mono mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[#C9D9F5] bg-white text-[8px] font-bold text-[#1D4ED8]">
                     {index + 1}
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold leading-snug text-slate-300">{recommendation.title}</p>
+                    <p className="text-[11px] font-semibold leading-snug text-[#0B1B3A]">{recommendation.title}</p>
                     {recommendation.detail ? (
-                      <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">{recommendation.detail}</p>
+                      <p className="mt-0.5 text-[10px] leading-relaxed text-[#47598A]">{recommendation.detail}</p>
                     ) : null}
                     {recommendation.basis ? (
-                      <p className="mono mt-0.5 text-[8px] leading-snug text-slate-600">{recommendation.basis}</p>
+                      <p className="mono mt-0.5 text-[8px] leading-snug text-[#47598A]">{recommendation.basis}</p>
                     ) : null}
                   </div>
                 </li>
@@ -236,8 +236,8 @@ export default function AlertCard({
           </details>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-space-700/60 pt-2.5">
-          <span className="mono text-[8.5px] text-slate-600">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#C9D9F5] pt-2.5">
+          <span className="mono text-[8.5px] text-[#47598A]">
             Detectada {relativeTime(alert.firstDetectedAt || alert.detectedAt)}
             {alert.acknowledgedAt ? ` · atendida ${relativeTime(alert.acknowledgedAt)}` : ''}
             {alert.resolvedAt ? ` · resuelta ${relativeTime(alert.resolvedAt)}` : ''}

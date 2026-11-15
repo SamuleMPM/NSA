@@ -35,7 +35,7 @@ export default function Sparkline({
   values = [],
   width = 132,
   height = 40,
-  color = '#22D3EE',
+  color = '#1D4ED8',
   fill = true,
   strokeWidth = 1.6,
   className = '',
@@ -58,7 +58,7 @@ export default function Sparkline({
           y1={height / 2}
           x2={width - 3}
           y2={height / 2}
-          stroke="rgba(148,197,255,0.16)"
+          stroke="#C9D9F5"
           strokeDasharray="3 4"
         />
       </svg>
@@ -80,7 +80,7 @@ export default function Sparkline({
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.16" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
@@ -100,7 +100,7 @@ export default function Sparkline({
         vectorEffect="non-scaling-stroke"
       />
       {showDot ? (
-        <circle cx={lastX} cy={lastY} r="2" fill={color} stroke="#05080F" strokeWidth="1" />
+        <circle cx={lastX} cy={lastY} r="2.2" fill={color} stroke="#FFFFFF" strokeWidth="1" />
       ) : null}
     </svg>
   );

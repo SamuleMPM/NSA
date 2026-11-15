@@ -15,30 +15,30 @@ const METRIC_META = {
   heart_rate: {
     code: 'HR',
     icon: Heart,
-    accent: '#FB7185',
-    spark: '#FB7185',
-    stroke: 'from-rose-400/70',
+    accent: '#1D4ED8',
+    spark: '#1D4ED8',
+    stroke: 'from-blue-600/70',
   },
   spo2: {
     code: 'SpO2',
     icon: Activity,
-    accent: '#22D3EE',
-    spark: '#22D3EE',
-    stroke: 'from-cyan-400/70',
+    accent: '#0EA5E9',
+    spark: '#0EA5E9',
+    stroke: 'from-sky-500/70',
   },
   temperature: {
     code: 'TEMP',
     icon: Thermometer,
-    accent: '#FBBF24',
-    spark: '#FBBF24',
-    stroke: 'from-amber-400/70',
+    accent: '#2563EB',
+    spark: '#2563EB',
+    stroke: 'from-blue-500/70',
   },
   respiratory_rate: {
     code: 'RR',
     icon: Wind,
-    accent: '#60A5FA',
-    spark: '#60A5FA',
-    stroke: 'from-blue-400/70',
+    accent: '#38BDF8',
+    spark: '#38BDF8',
+    stroke: 'from-sky-400/70',
   },
 };
 
@@ -86,23 +86,23 @@ export default function VitalCard({
   const normalStart = clampPct(((domain.normalMin - domain.min) / (domain.max - domain.min)) * 100);
   const normalWidth = clampPct(((domain.normalMax - domain.normalMin) / (domain.max - domain.min)) * 100);
 
-  const alertColor = isAlert ? '#FB7185' : isWarning ? '#FBBF24' : meta.accent;
-  const sparkColor = isAlert ? '#FB7185' : isWarning ? '#FBBF24' : meta.spark;
+  const alertColor = isAlert ? '#A16207' : isWarning ? '#0369A1' : meta.accent;
+  const sparkColor = isAlert ? '#A16207' : isWarning ? '#0369A1' : meta.spark;
 
   const deltaTone =
     delta === 0
-      ? 'text-slate-500 bg-white/[0.03] border-space-700/70'
+      ? 'text-[#47598A] bg-[#F8FAFD] border-[#C9D9F5]'
       : variable === 'spo2'
         ? delta > 0
-          ? 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20'
-          : 'text-rose-300 bg-rose-400/10 border-rose-400/20'
+          ? 'text-[#047857] bg-[#D1FAE5] border-[#A7F3D0]'
+          : 'text-[#E11D48] bg-[#FFE4E6] border-[#FDA4AF]'
         : delta > 0
-          ? 'text-amber-300 bg-amber-400/10 border-amber-400/20'
-          : 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20';
+          ? 'text-[#A16207] bg-[#FEF3C7] border-[#FDE68A]'
+          : 'text-[#1D4ED8] bg-[#DBEAFE] border-[#C9D9F5]';
 
   return (
     <article
-      className={`panel hud-corner group relative overflow-hidden p-3.5 transition-colors ${
+      className={`panel group relative overflow-hidden p-3.5 transition-colors ${
         isAlert ? 'panel-critical' : isWarning ? 'panel-warning' : 'panel-hover'
       }`}
       aria-live="polite"
@@ -116,20 +116,20 @@ export default function VitalCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-2.5">
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-space-700/80 bg-space-900/80"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE]"
             style={{ color: alertColor }}
           >
             <Icon className={`h-4 w-4 ${isAlert ? 'animate-pulse' : ''}`} aria-hidden="true" />
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="mono text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500">
+              <span className="mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#47598A]">
                 {meta.code}
               </span>
-              <span className="h-2.5 w-px bg-space-700" />
-              <span className="mono text-[9px] text-slate-500">REF {normalRange}</span>
+              <span className="h-2.5 w-px bg-[#C9D9F5]" />
+              <span className="mono text-[9px] text-[#47598A]">REF {normalRange}</span>
             </div>
-            <h3 className="mt-0.5 truncate font-heading text-[12.5px] font-bold tracking-tight text-slate-100">
+            <h3 className="mt-0.5 truncate font-heading text-[12.5px] font-bold tracking-tight text-[#1D4ED8]">
               {title}
             </h3>
           </div>
@@ -144,11 +144,11 @@ export default function VitalCard({
         <div className="flex items-baseline gap-1.5">
           <span
             className="value-lg"
-            style={{ color: isAlert || isWarning ? alertColor : '#EAF3FF' }}
+            style={{ color: isAlert || isWarning ? alertColor : '#0B1B3A' }}
           >
             {value !== undefined ? value : '--'}
           </span>
-          <span className="mono pb-0.5 text-[10px] font-semibold text-slate-500">{unit}</span>
+          <span className="mono pb-0.5 text-[10px] font-semibold text-[#47598A]">{unit}</span>
         </div>
 
         <span className={`mono inline-flex items-center gap-1 rounded border px-1.5 py-1 text-[9.5px] font-bold ${deltaTone}`}>
@@ -189,15 +189,15 @@ export default function VitalCard({
             aria-hidden="true"
           />
           <span
-            className="absolute top-1/2 z-[3] h-2 w-2 -translate-y-1/2 rounded-full border border-space-950"
-            style={{ left: `calc(${gaugePct}% - 4px)`, backgroundColor: alertColor, boxShadow: `0 0 8px ${alertColor}` }}
+            className="absolute top-1/2 z-[3] h-2 w-2 -translate-y-1/2 rounded-full border border-white"
+            style={{ left: `calc(${gaugePct}% - 4px)`, backgroundColor: alertColor }}
             aria-hidden="true"
           />
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between gap-2 font-mono text-[8.5px] text-slate-600">
+        <div className="mt-1.5 flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#47598A]">
           <span className="flex items-center gap-1">
-            <span className="h-1 w-1 rounded-full bg-emerald-400/80" />
+            <span className="h-1 w-1 rounded-full bg-[#047857]" />
             ZONA NOMINAL
           </span>
           <span className="truncate text-right" title={statusMessage || 'Parámetro nominal'}>
@@ -206,10 +206,10 @@ export default function VitalCard({
         </div>
       </div>
 
-      <div className="mt-2 border-t border-space-700/60 pt-1.5">
-        <div className="flex items-center justify-between gap-2 font-mono text-[8.5px] text-slate-500">
+      <div className="mt-2 border-t border-[#C9D9F5] pt-1.5">
+        <div className="flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#47598A]">
           <span>UMBRAL ALERTA</span>
-          <span className="font-bold text-slate-400">{alertCondition}</span>
+          <span className="font-bold text-[#0B1B3A]">{alertCondition}</span>
         </div>
       </div>
     </article>

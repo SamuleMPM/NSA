@@ -73,7 +73,7 @@ export default function AstronautSelector({
             value: vitals.heart_rate,
             unit: 'bpm',
             icon: Heart,
-            color: '#FB7185',
+            color: '#1D4ED8',
           },
           {
             key: 'spo2',
@@ -81,7 +81,7 @@ export default function AstronautSelector({
             value: vitals.spo2,
             unit: '%',
             icon: Activity,
-            color: '#22D3EE',
+            color: '#0EA5E9',
           },
           {
             key: 'temperature',
@@ -89,7 +89,7 @@ export default function AstronautSelector({
             value: vitals.temperature,
             unit: '°C',
             icon: Thermometer,
-            color: '#FBBF24',
+            color: '#2563EB',
           },
           {
             key: 'respiratory_rate',
@@ -97,7 +97,7 @@ export default function AstronautSelector({
             value: vitals.respiratory_rate,
             unit: 'rpm',
             icon: Wind,
-            color: '#60A5FA',
+            color: '#38BDF8',
           },
         ];
 
@@ -115,13 +115,13 @@ export default function AstronautSelector({
             key={id}
             type="button"
             onClick={() => onSelect(id)}
-            className={`panel hud-corner group relative overflow-hidden p-3 text-left transition-all duration-150 ${
+            className={`panel group relative overflow-hidden p-3 text-left transition-all duration-150 ${
               isCritical
                 ? 'panel-critical'
                 : isWarning
                   ? 'panel-warning'
                   : isSelected
-                    ? 'panel-active'
+                    ? 'panel-active border-[#1D4ED8] bg-[#DBEAFE]/25 shadow-co-md'
                     : 'panel-hover'
             }`}
             aria-pressed={isSelected}
@@ -130,11 +130,11 @@ export default function AstronautSelector({
               className="absolute inset-x-0 top-0 h-[2px]"
               style={{
                 background: isCritical
-                  ? 'linear-gradient(90deg, transparent, #FB7185, transparent)'
+                  ? 'linear-gradient(90deg, transparent, #A16207, transparent)'
                   : isWarning
-                    ? 'linear-gradient(90deg, transparent, #FBBF24, transparent)'
+                    ? 'linear-gradient(90deg, transparent, #0369A1, transparent)'
                     : isSelected
-                      ? 'linear-gradient(90deg, transparent, #22D3EE, transparent)'
+                      ? 'linear-gradient(90deg, transparent, #1D4ED8, transparent)'
                       : 'transparent',
               }}
               aria-hidden="true"
@@ -145,12 +145,12 @@ export default function AstronautSelector({
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-heading text-[11px] font-extrabold ${
                     isCritical
-                      ? 'border-rose-400/40 bg-rose-400/10 text-rose-200'
+                      ? 'border-[#FDE68A] bg-[#FEF3C7] text-[#A16207]'
                       : isWarning
-                        ? 'border-amber-400/40 bg-amber-400/10 text-amber-200'
+                        ? 'border-[#BAE6FD] bg-[#E0F2FE] text-[#0369A1]'
                         : isSelected
-                          ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-200'
-                          : 'border-space-700 bg-space-900 text-slate-400'
+                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
+                          : 'border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]'
                   }`}
                 >
                   {initials(ast.name)}
@@ -158,18 +158,18 @@ export default function AstronautSelector({
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate font-heading text-[12.5px] font-bold text-slate-100">
+                    <span className="truncate font-heading text-[12.5px] font-bold text-[#0B1B3A]">
                       {ast.name}
                     </span>
-                    <span className="mono text-[8.5px] text-slate-600">{roleCode(ast.role)}</span>
+                    <span className="mono text-[8.5px] text-[#47598A]">{roleCode(ast.role)}</span>
                     {isCritical || isWarning ? (
                       <AlertTriangle
-                        className={`h-3 w-3 shrink-0 ${isCritical ? 'text-rose-300' : 'text-amber-300'}`}
+                        className={`h-3 w-3 shrink-0 ${isCritical ? 'text-[#A16207]' : 'text-[#0369A1]'}`}
                         aria-hidden="true"
                       />
                     ) : null}
                   </div>
-                  <span className="mono mt-0.5 block truncate text-[9px] text-slate-500">
+                  <span className="mono mt-0.5 block truncate text-[9px] text-[#47598A]">
                     {id.toUpperCase()} · {ast.role}
                   </span>
                 </div>
@@ -177,11 +177,11 @@ export default function AstronautSelector({
 
               <span
                 className={`mono shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold ${
-                  isEva
-                    ? 'border-amber-400/30 bg-amber-400/10 text-amber-300'
-                    : isSelected
-                      ? 'border-cyan-400/25 bg-cyan-400/[0.07] text-cyan-300'
-                      : 'border-space-700 bg-space-900 text-slate-500'
+                  isSelected
+                    ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
+                    : isEva
+                      ? 'border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]'
+                      : 'border-[#C9D9F5] bg-white text-[#47598A]'
                 }`}
               >
                 {ast.activity}
@@ -193,31 +193,31 @@ export default function AstronautSelector({
                 const Icon = metric.icon;
                 const level = vitalLevel(metric.key, metric.value);
                 const metricColor =
-                  level === 'critical' ? '#FB7185' : level === 'warning' ? '#FBBF24' : metric.color;
+                  level === 'critical' ? '#A16207' : level === 'warning' ? '#0369A1' : metric.color;
                 return (
                   <div key={metric.key} className="panel-inset px-1.5 py-1.5">
-                    <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-slate-600">
+                    <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-[#47598A]">
                       <Icon className="h-2.5 w-2.5" style={{ color: metricColor }} aria-hidden="true" />
                       {metric.label}
                     </span>
                     <span
                       className={`mono mt-1 block text-[10.5px] font-bold ${
                         level === 'critical'
-                          ? 'text-rose-300'
+                          ? 'text-[#A16207]'
                           : level === 'warning'
-                            ? 'text-amber-300'
-                            : 'text-slate-200'
+                            ? 'text-[#0369A1]'
+                            : 'text-[#0B1B3A]'
                       }`}
                     >
                       {metric.value ?? '--'}
-                      <span className="ml-0.5 text-[7.5px] font-normal text-slate-600">{metric.unit}</span>
+                      <span className="ml-0.5 text-[7.5px] font-normal text-[#47598A]">{metric.unit}</span>
                     </span>
                   </div>
                 );
               })}
             </div>
 
-            <div className="mt-2 flex items-center justify-between gap-2 border-t border-space-700/60 pt-1.5">
+            <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#C9D9F5] pt-1.5">
               <StatusPill
                 status={isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'}
                 dot={false}
@@ -234,7 +234,7 @@ export default function AstronautSelector({
                   </>
                 )}
               </StatusPill>
-              <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-slate-500 group-hover:text-cyan-300">
+              <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-[#47598A] group-hover:text-[#1D4ED8]">
                 TELEMETRÍA
                 <ChevronRight className="h-2.5 w-2.5" aria-hidden="true" />
               </span>

@@ -52,8 +52,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Frecuencia Cardíaca',
       short: 'HR',
       unit: 'bpm',
-      color: '#FB7185',
-      gradientId: 'grad-hr-nasa',
+      color: '#1D4ED8',
+      gradientId: 'grad-hr-co',
       icon: Heart,
       minRange: 45,
       maxRange: 155,
@@ -64,8 +64,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Presión Sistólica',
       short: 'PA Sys',
       unit: 'mmHg',
-      color: '#F472B6',
-      gradientId: 'grad-bp-nasa',
+      color: '#0EA5E9',
+      gradientId: 'grad-bp-co',
       icon: Gauge,
       minRange: 80,
       maxRange: 160,
@@ -76,8 +76,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Saturación SpO2',
       short: 'SpO2',
       unit: '%',
-      color: '#22D3EE',
-      gradientId: 'grad-spo2-nasa',
+      color: '#0284C7',
+      gradientId: 'grad-spo2-co',
       icon: Activity,
       minRange: 80,
       maxRange: 100,
@@ -88,8 +88,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Temperatura Corporal',
       short: 'TEMP',
       unit: '°C',
-      color: '#FBBF24',
-      gradientId: 'grad-temp-nasa',
+      color: '#2563EB',
+      gradientId: 'grad-temp-co',
       icon: Thermometer,
       minRange: 35.5,
       maxRange: 39.5,
@@ -100,8 +100,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Frecuencia Respiratoria',
       short: 'RR',
       unit: 'rpm',
-      color: '#60A5FA',
-      gradientId: 'grad-rr-nasa',
+      color: '#38BDF8',
+      gradientId: 'grad-rr-co',
       icon: Wind,
       minRange: 8,
       maxRange: 32,
@@ -112,8 +112,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Glucosa en Sangre',
       short: 'GLUC',
       unit: 'mg/dL',
-      color: '#F59E0B',
-      gradientId: 'grad-gluc-nasa',
+      color: '#1E40AF',
+      gradientId: 'grad-gluc-co',
       icon: Apple,
       minRange: 60,
       maxRange: 160,
@@ -124,8 +124,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Horas de Sueño',
       short: 'SLEEP',
       unit: 'h',
-      color: '#A78BFA',
-      gradientId: 'grad-sleep-nasa',
+      color: '#3B82F6',
+      gradientId: 'grad-sleep-co',
       icon: Clock,
       minRange: 4,
       maxRange: 11,
@@ -136,8 +136,8 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Nivel de Estrés',
       short: 'ESTRÉS',
       unit: '%',
-      color: '#C084FC',
-      gradientId: 'grad-stress-nasa',
+      color: '#1E3A8A',
+      gradientId: 'grad-stress-co',
       icon: Brain,
       minRange: 0,
       maxRange: 100,
@@ -198,14 +198,14 @@ export default function TelemetryCharts({ history = [] }) {
 
   return (
     <section className="panel overflow-hidden">
-      <div className="flex flex-col gap-3 border-b border-space-700/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-[#C9D9F5] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]">
             <LineChart className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
           <div>
             <span className="eyebrow block">TEMPORAL ANALYSIS / MULTI-CHANNEL</span>
-            <h3 className="font-heading text-[13px] font-bold text-slate-100">
+            <h3 className="font-heading text-[13px] font-bold text-[#1D4ED8]">
               Evolución biomédica y tendencia temporal
             </h3>
           </div>
@@ -233,14 +233,14 @@ export default function TelemetryCharts({ history = [] }) {
                 onClick={() => setActiveMetric(key)}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[10px] font-semibold transition-colors ${
                   active
-                    ? 'border-cyan-400/35 bg-cyan-400/[0.08] text-cyan-200'
-                    : 'border-space-700/70 bg-space-900/40 text-slate-500 hover:border-space-600 hover:text-slate-300'
+                    ? 'border-[#1D4ED8] bg-[#DBEAFE] text-[#1D4ED8]'
+                    : 'border-[#C9D9F5] bg-white text-[#47598A] hover:bg-[#F8FAFD] hover:text-[#0B1B3A]'
                 }`}
                 aria-pressed={active}
               >
                 <Icon className="h-3 w-3" style={{ color: active ? cfg.color : undefined }} aria-hidden="true" />
                 <span>{cfg.short}</span>
-                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-cyan-300/60' : 'text-slate-600'}`}>
+                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-[#1D4ED8]/70' : 'text-[#47598A]'}`}>
                   {cfg.unit}
                 </span>
               </button>
@@ -252,7 +252,7 @@ export default function TelemetryCharts({ history = [] }) {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">CANAL</span>
-            <span className="mt-1 flex items-center gap-1.5 font-heading text-[11px] font-bold text-slate-200">
+            <span className="mt-1 flex items-center gap-1.5 font-heading text-[11px] font-bold text-[#0B1B3A]">
               <CurrentIcon className="h-3.5 w-3.5" style={{ color: currentCfg.color }} aria-hidden="true" />
               {currentCfg.label}
             </span>
@@ -260,38 +260,31 @@ export default function TelemetryCharts({ history = [] }) {
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">ACTUAL</span>
             <span className="value-sm mt-1 block" style={{ color: currentCfg.color }}>
-              {latestVal} <span className="text-[9px] font-normal text-slate-500">{currentCfg.unit}</span>
+              {latestVal} <span className="text-[9px] font-normal text-[#47598A]">{currentCfg.unit}</span>
             </span>
           </div>
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">MÍNIMO</span>
-            <span className="value-sm mt-1 block text-slate-300">{minVal}</span>
+            <span className="value-sm mt-1 block text-[#0B1B3A]">{minVal}</span>
           </div>
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">PROMEDIO</span>
-            <span className="value-sm mt-1 block text-slate-300">{avgVal}</span>
+            <span className="value-sm mt-1 block text-[#0B1B3A]">{avgVal}</span>
           </div>
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">MÁXIMO</span>
-            <span className="value-sm mt-1 block text-rose-300">{maxVal}</span>
+            <span className="value-sm mt-1 block text-[#0B1B3A]">{maxVal}</span>
           </div>
         </div>
 
         {/* Visualizador SVG con Curva Suavizada y Banda de Rango Seguro */}
-        <div className="relative overflow-hidden rounded-md border border-space-700/80 bg-[#040A12] p-1">
+        <div className="relative overflow-hidden rounded-md border border-[#C9D9F5] bg-white p-1 shadow-co-sm">
           <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="h-auto w-full" role="img" aria-label={`Gráfico temporal de ${currentCfg.label}`}>
             <defs>
               <linearGradient id={currentCfg.gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor={currentCfg.color} stopOpacity="0.26" />
+                <stop offset="0%" stopColor={currentCfg.color} stopOpacity="0.16" />
                 <stop offset="100%" stopColor={currentCfg.color} stopOpacity="0" />
               </linearGradient>
-              <filter id={`glow-${activeMetric}`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
             </defs>
 
             {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
@@ -304,14 +297,14 @@ export default function TelemetryCharts({ history = [] }) {
                     y1={y}
                     x2={svgWidth - paddingX}
                     y2={y}
-                    stroke="rgba(148, 197, 255, 0.09)"
+                    stroke="#C9D9F5"
                     strokeDasharray="2 5"
                   />
                   <text
                     x={paddingX - 10}
                     y={y + 3}
                     textAnchor="end"
-                    fill="#5E7392"
+                    fill="#47598A"
                     fontSize="9"
                     fontFamily="'JetBrains Mono', monospace"
                   >
@@ -330,7 +323,7 @@ export default function TelemetryCharts({ history = [] }) {
                   y1={paddingY}
                   x2={x}
                   y2={svgHeight - paddingBottom}
-                  stroke="rgba(148, 197, 255, 0.045)"
+                  stroke="rgba(201, 217, 245, 0.45)"
                   strokeDasharray="2 8"
                 />
               );
@@ -341,14 +334,14 @@ export default function TelemetryCharts({ history = [] }) {
               y={clampedTop}
               width={effectiveWidth}
               height={zoneHeight}
-              fill="rgba(52, 211, 153, 0.075)"
-              stroke="rgba(52, 211, 153, 0.26)"
+              fill="rgba(4, 120, 87, 0.08)"
+              stroke="rgba(4, 120, 87, 0.28)"
               strokeDasharray="3 4"
             />
             <text
               x={paddingX + 7}
               y={clampedTop + 11}
-              fill="#6EE7B7"
+              fill="#047857"
               fontSize="8"
               fontFamily="'JetBrains Mono', monospace"
               letterSpacing="1"
@@ -364,7 +357,6 @@ export default function TelemetryCharts({ history = [] }) {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              filter={`url(#glow-${activeMetric})`}
             />
 
             {points.map((pt, i) => {
@@ -374,18 +366,18 @@ export default function TelemetryCharts({ history = [] }) {
                 <g key={i}>
                   {isLast ? (
                     <>
-                      <circle cx={pt.x} cy={pt.y} r="7" fill={currentCfg.color} opacity="0.12" />
-                      <circle cx={pt.x} cy={pt.y} r="3.2" fill="#FFFFFF" stroke={currentCfg.color} strokeWidth="1.5" />
+                      <circle cx={pt.x} cy={pt.y} r="7" fill={currentCfg.color} opacity="0.14" />
+                      <circle cx={pt.x} cy={pt.y} r="3.2" fill="#FFFFFF" stroke={currentCfg.color} strokeWidth="2" />
                     </>
                   ) : (
-                    <circle cx={pt.x} cy={pt.y} r="1.7" fill={currentCfg.color} opacity={i % 3 === 0 ? 0.75 : 0.25} />
+                    <circle cx={pt.x} cy={pt.y} r="1.7" fill={currentCfg.color} opacity={i % 3 === 0 ? 0.8 : 0.3} />
                   )}
                   {isAnchor ? (
                     <text
                       x={pt.x}
                       y={svgHeight - 10}
                       textAnchor="middle"
-                      fill="#5E7392"
+                      fill="#47598A"
                       fontSize="8"
                       fontFamily="'JetBrains Mono', monospace"
                     >
@@ -398,13 +390,13 @@ export default function TelemetryCharts({ history = [] }) {
           </svg>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] text-slate-600">
+        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] text-[#47598A]">
           <span className="flex items-center gap-1.5">
             <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: currentCfg.color }} />
             {currentCfg.label.toUpperCase()} · {currentCfg.unit}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-sm border border-emerald-400/40 bg-emerald-400/10" />
+            <span className="h-2 w-2 rounded-sm border border-[#047857]/40 bg-[#047857]/15" />
             BANDA DE RANGO SEGURO
           </span>
           <span className="flex items-center gap-1">

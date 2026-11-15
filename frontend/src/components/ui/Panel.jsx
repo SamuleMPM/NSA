@@ -25,23 +25,23 @@ export function PanelHeader({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3 border-b border-space-700/70 sm:flex-row sm:items-center sm:justify-between ${
+      className={`flex flex-col gap-3 border-b border-[#C9D9F5] sm:flex-row sm:items-center sm:justify-between ${
         compact ? 'px-3 py-2.5' : 'px-4 py-3'
       } ${className}`}
     >
       <div className="flex min-w-0 items-start gap-2.5">
         {Icon ? (
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-space-700 bg-space-900/80 text-telemetry-cyan">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]">
             <Icon className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
         ) : null}
         <div className="min-w-0">
           {kicker ? <span className="eyebrow block">{kicker}</span> : null}
-          <h3 className="truncate font-heading text-[13px] font-bold tracking-tight text-slate-100">
+          <h3 className="truncate font-heading text-[13px] font-bold tracking-tight text-[#1D4ED8]">
             {title}
           </h3>
           {description ? (
-            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-400">
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-[#47598A]">
               {description}
             </p>
           ) : null}

@@ -7,28 +7,49 @@ export default {
   theme: {
     extend: {
       colors: {
+        /* Tokens oficiales Clean Orbit */
+        co: {
+          background: 'var(--co-background)',
+          surface: 'var(--co-surface)',
+          border: 'var(--co-border)',
+          'text-primary': 'var(--co-text-primary)',
+          'text-secondary': 'var(--co-text-secondary)',
+          primary: 'var(--co-primary)',
+          'primary-deep': 'var(--co-primary-deep)',
+          cyan: 'var(--co-cyan)',
+          'blue-soft': 'var(--co-blue-soft)',
+          accent: 'var(--co-accent)',
+          'accent-text': 'var(--co-accent-text)',
+          nominal: 'var(--co-nominal)',
+          warning: 'var(--co-warning)',
+          high: 'var(--co-high)',
+          critical: 'var(--co-critical)',
+          emergency: 'var(--co-emergency)',
+          simulated: 'var(--co-simulated)',
+        },
+        /* Adaptación de la escala heredada a Clean Orbit */
         space: {
-          950: '#05080F', // deep space
-          925: '#070C16',
-          900: '#0A111D', // console base
-          850: '#0E1828', // panel
-          800: '#132238', // raised
-          750: '#1A2C45', // active
-          700: '#1B2C44', // hairline
-          600: '#2A405C', // strong border
-          500: '#3D5A78',
+          950: '#EAF1FE', // fondo general Clean Orbit
+          925: '#EFF5FE',
+          900: '#F5F8FE',
+          850: '#FFFFFF', // superficie principal
+          800: '#C9D9F5', // bordes y separadores
+          750: '#DBEAFE', // azul suave
+          700: '#C9D9F5', // bordes
+          600: '#A8C4F0',
+          500: '#47598A', // texto secundario
         },
         telemetry: {
-          cyan: '#22D3EE',
-          ice: '#67E8F9',
-          sky: '#38BDF8',
-          blue: '#60A5FA',
-          green: '#34D399',
-          mint: '#6EE7B7',
-          amber: '#FBBF24',
-          crimson: '#FB7185',
-          red: '#F87171',
-          violet: '#A78BFA',
+          cyan: '#0EA5E9',   // azul de apoyo / cian Clean Orbit
+          ice: '#DBEAFE',    // fondo azul suave
+          sky: '#38BDF8',    // cian celeste
+          blue: '#1D4ED8',   // azul primario Clean Orbit
+          green: '#047857',  // nominal Clean Orbit
+          mint: '#10B981',
+          amber: '#0369A1',  // advertencia Clean Orbit
+          crimson: '#C2410C',// alto Clean Orbit
+          red: '#E11D48',    // emergencia Clean Orbit
+          violet: '#6D28D9', // simulado Clean Orbit
         },
       },
       fontFamily: {
@@ -40,15 +61,17 @@ export default {
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
       },
       boxShadow: {
-        'hud': '0 0 0 1px rgba(34, 211, 238, 0.16), 0 18px 48px -24px rgba(0, 0, 0, 0.85)',
-        'hud-glow': '0 0 0 1px rgba(34, 211, 238, 0.34), 0 0 34px -12px rgba(34, 211, 238, 0.34)',
-        'hud-danger': '0 0 0 1px rgba(251, 113, 133, 0.36), 0 0 30px -14px rgba(251, 113, 133, 0.45)',
-        'hud-warning': '0 0 0 1px rgba(251, 191, 36, 0.32), 0 0 30px -14px rgba(251, 191, 36, 0.35)',
-        'panel': '0 22px 60px -36px rgba(0, 0, 0, 0.95)',
+        'hud': '0 1px 2px rgba(11,27,58,.06)',
+        'hud-glow': '0 8px 24px rgba(29,78,216,.14)',
+        'hud-danger': '0 8px 24px rgba(225,29,72,.14)',
+        'hud-warning': '0 8px 24px rgba(3,105,161,.14)',
+        'panel': '0 1px 2px rgba(11,27,58,.06)',
+        'co-sm': '0 1px 2px rgba(11,27,58,.06)',
+        'co-md': '0 8px 24px rgba(29,78,216,.14)',
       },
       backgroundImage: {
-        'console-grid': 'linear-gradient(rgba(96, 165, 250, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(96, 165, 250, 0.045) 1px, transparent 1px)',
-        'panel-sheen': 'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.008) 42%, transparent 100%)',
+        'console-grid': 'linear-gradient(rgba(201, 217, 245, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 217, 245, 0.4) 1px, transparent 1px)',
+        'panel-sheen': 'none',
       },
     },
   },

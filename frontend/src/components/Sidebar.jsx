@@ -51,20 +51,20 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
     <>
       {/* Sidebar de escritorio, expandible/contraíble */}
       <aside
-        className={`sticky top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-space-800/90 bg-space-950/95 backdrop-blur-xl transition-[width] duration-200 ease-out lg:flex ${
+        className={`sticky top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-[#C9D9F5]/30 bg-gradient-to-b from-[#1E40AF] to-[#1D4ED8] text-[#DBEAFE] shadow-co-md transition-[width] duration-200 ease-out lg:flex ${
           collapsed ? 'w-[76px]' : 'w-[264px]'
         }`}
         aria-label="Navegación principal"
       >
-        <div className={`flex h-[60px] items-center border-b border-space-800/90 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+        <div className={`flex h-[60px] items-center border-b border-white/15 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/15 text-white">
               <Orbit className="h-4 w-4" aria-hidden="true" />
             </span>
             {!collapsed ? (
               <div className="min-w-0 leading-tight">
-                <span className="mono block text-[8px] uppercase tracking-[0.16em] text-slate-500">Consola</span>
-                <span className="block truncate font-heading text-[11.5px] font-bold text-slate-200">Navegación</span>
+                <span className="mono block text-[8px] uppercase tracking-[0.16em] text-[#DBEAFE]/75">Consola</span>
+                <span className="block truncate font-heading text-[11.5px] font-bold text-white">Navegación</span>
               </div>
             ) : null}
           </div>
@@ -72,7 +72,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
             <button
               type="button"
               onClick={toggleCollapsed}
-              className="btn btn-ghost btn-icon !h-8 !w-8 !min-w-0"
+              className="btn btn-ghost btn-icon !h-8 !w-8 !min-w-0 text-[#DBEAFE] hover:bg-white/10 hover:text-white"
               aria-label="Contraer barra lateral"
               title="Contraer barra lateral"
               aria-expanded={!collapsed}
@@ -83,7 +83,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
         </div>
 
         <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4" aria-label="Módulos principales">
-          {!collapsed ? <span className="eyebrow mb-2 block px-2">Módulos / 03</span> : null}
+          {!collapsed ? <span className="eyebrow mb-2 block px-2 text-[#DBEAFE]/80">Módulos / 03</span> : null}
           <div className="space-y-1.5">
             {PRIMARY_MODULES.map((module) => {
               const Icon = module.icon;
@@ -94,22 +94,24 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                   key={module.id}
                   type="button"
                   onClick={() => handleSelect(module.id)}
-                  className={`nav-item group ${isActive ? 'nav-item-active' : ''} ${
-                    collapsed ? 'justify-center !px-0' : ''
-                  }`}
+                  className={`group relative flex w-full items-center gap-2.5 rounded-md p-2 text-left transition-all duration-150 ${
+                    isActive
+                      ? 'bg-white text-[#1D4ED8] shadow-co-sm'
+                      : 'text-[#DBEAFE] hover:bg-white/10 hover:text-white'
+                  } ${collapsed ? 'justify-center !px-0' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
                   title={collapsed ? `${module.name} · ${module.desc}` : undefined}
                 >
                   <span
-                    className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                    className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
                       isActive
-                        ? 'border-cyan-400/35 bg-cyan-400/10 text-telemetry-cyan'
-                        : 'border-space-700/70 bg-space-900/70 text-slate-500 group-hover:text-slate-300'
+                        ? 'bg-transparent text-[#1D4ED8]'
+                        : 'border border-white/20 bg-white/10 text-[#DBEAFE] group-hover:text-white'
                     }`}
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" />
                     {isDashboard ? (
-                      <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-space-950 bg-rose-400 px-1 font-mono text-[8px] font-bold text-space-950">
+                      <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F97316] px-1 font-mono text-[8px] font-bold text-white shadow-none">
                         {alertCount > 9 ? '9+' : alertCount}
                       </span>
                     ) : null}
@@ -118,10 +120,16 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                   {!collapsed ? (
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center justify-between gap-2">
-                        <span className="truncate font-heading text-[12.5px] font-bold tracking-tight">{module.name}</span>
-                        <span className="mono text-[8.5px] text-slate-600">{module.index}</span>
+                        <span className={`truncate font-heading text-[12.5px] font-bold tracking-tight ${isActive ? 'text-[#1D4ED8]' : 'text-white'}`}>
+                          {module.name}
+                        </span>
+                        <span className={`mono text-[8.5px] ${isActive ? 'text-[#1D4ED8]/70' : 'text-[#DBEAFE]/70'}`}>
+                          {module.index}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block truncate text-[10px] leading-tight text-slate-500">{module.desc}</span>
+                      <span className={`mt-0.5 block truncate text-[10px] leading-tight ${isActive ? 'text-[#1D4ED8]/85' : 'text-[#DBEAFE]/80'}`}>
+                        {module.desc}
+                      </span>
                     </span>
                   ) : null}
                 </button>
@@ -130,12 +138,12 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
           </div>
         </nav>
 
-        <div className={`safe-bottom border-t border-space-800/90 px-2 py-3 ${collapsed ? 'flex flex-col items-center gap-2' : ''}`}>
+        <div className={`safe-bottom border-t border-white/15 px-2 py-3 ${collapsed ? 'flex flex-col items-center gap-2' : ''}`}>
           {collapsed ? (
             <button
               type="button"
               onClick={toggleCollapsed}
-              className="btn btn-ghost btn-icon !h-9 !w-9 !min-w-0"
+              className="btn btn-ghost btn-icon !h-9 !w-9 !min-w-0 text-[#DBEAFE] hover:bg-white/10 hover:text-white"
               aria-label="Expandir barra lateral"
               title="Expandir barra lateral"
               aria-expanded={!collapsed}
@@ -143,15 +151,15 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
               <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
             </button>
           ) : (
-            <div className="rounded-md border border-space-700/70 bg-space-900/45 px-2.5 py-2">
+            <div className="rounded-md border border-white/20 bg-white/10 px-2.5 py-2 text-[#DBEAFE]">
               <div className="flex items-center justify-between gap-2">
-                <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-500">
+                <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-white">
                   <ShieldCheck className="h-3 w-3 text-emerald-300" aria-hidden="true" />
                   Persistencia local
                 </span>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" aria-hidden="true" />
               </div>
-              <p className="mt-1 text-[9.5px] leading-snug text-slate-600">
+              <p className="mt-1 text-[9.5px] leading-snug text-[#DBEAFE]/85">
                 Datos y alertas guardados en el navegador. Preparado para API futura.
               </p>
             </div>
@@ -161,7 +169,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
 
       {/* Navegación móvil: no ocupa el topbar */}
       <nav
-        className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-space-800/90 bg-space-950/95 backdrop-blur-xl lg:hidden"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-[#C9D9F5]/30 bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] text-[#DBEAFE] shadow-co-md lg:hidden"
         aria-label="Navegación principal móvil"
       >
         <div className="mx-auto grid max-w-md grid-cols-3 gap-1 px-2 py-1.5">
@@ -174,14 +182,14 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                 type="button"
                 onClick={() => handleSelect(module.id)}
                 className={`relative flex flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 transition-colors ${
-                  isActive ? 'bg-cyan-400/[0.08] text-cyan-200' : 'text-slate-500 hover:text-slate-300'
+                  isActive ? 'bg-white text-[#1D4ED8] font-bold shadow-co-sm' : 'text-[#DBEAFE] hover:text-white hover:bg-white/10'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                 <span className="mono text-[8.5px] font-semibold leading-none">{module.name}</span>
                 {module.id === 'dashboard' && alertCount > 0 ? (
-                  <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-400 px-1 font-mono text-[8px] font-bold text-space-950">
+                  <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#F97316] px-1 font-mono text-[8px] font-bold text-white">
                     {alertCount > 9 ? '9+' : alertCount}
                   </span>
                 ) : null}
