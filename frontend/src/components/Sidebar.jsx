@@ -51,7 +51,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
     <>
       {/* Sidebar de escritorio, expandible/contraíble */}
       <aside
-        className={`sticky top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-[#C9D9F5]/30 bg-gradient-to-b from-[#1E40AF] to-[#1D4ED8] text-[#DBEAFE] shadow-co-md transition-[width] duration-200 ease-out lg:flex ${
+        className={`sticky top-0 z-40 hidden h-screen shrink-0 flex-col border-r border-[#C9D9F5]/30 bg-gradient-to-b from-[#061D47] to-[#0B3D91] text-[#DBEAFE] shadow-co-md transition-[width] duration-200 ease-out lg:flex ${
           collapsed ? 'w-[76px]' : 'w-[264px]'
         }`}
         aria-label="Navegación principal"
@@ -96,7 +96,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                   onClick={() => handleSelect(module.id)}
                   className={`group relative flex w-full items-center gap-2.5 rounded-md p-2 text-left transition-all duration-150 ${
                     isActive
-                      ? 'bg-white text-[#1D4ED8] shadow-co-sm'
+                      ? 'bg-white text-[#0B3D91] shadow-co-sm'
                       : 'text-[#DBEAFE] hover:bg-white/10 hover:text-white'
                   } ${collapsed ? 'justify-center !px-0' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
@@ -105,7 +105,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                   <span
                     className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
                       isActive
-                        ? 'bg-transparent text-[#1D4ED8]'
+                        ? 'bg-transparent text-[#0B3D91]'
                         : 'border border-white/20 bg-white/10 text-[#DBEAFE] group-hover:text-white'
                     }`}
                   >
@@ -120,14 +120,14 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                   {!collapsed ? (
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center justify-between gap-2">
-                        <span className={`truncate font-heading text-[12.5px] font-bold tracking-tight ${isActive ? 'text-[#1D4ED8]' : 'text-white'}`}>
+                        <span className={`truncate font-heading text-[12.5px] font-bold tracking-tight ${isActive ? 'text-[#0B3D91]' : 'text-white'}`}>
                           {module.name}
                         </span>
-                        <span className={`mono text-[8.5px] ${isActive ? 'text-[#1D4ED8]/70' : 'text-[#DBEAFE]/70'}`}>
+                        <span className={`mono text-[8.5px] ${isActive ? 'text-[#0B3D91]/70' : 'text-[#DBEAFE]/70'}`}>
                           {module.index}
                         </span>
                       </span>
-                      <span className={`mt-0.5 block truncate text-[10px] leading-tight ${isActive ? 'text-[#1D4ED8]/85' : 'text-[#DBEAFE]/80'}`}>
+                      <span className={`mt-0.5 block truncate text-[10px] leading-tight ${isActive ? 'text-[#0B3D91]/85' : 'text-[#DBEAFE]/80'}`}>
                         {module.desc}
                       </span>
                     </span>
@@ -169,7 +169,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
 
       {/* Navegación móvil: no ocupa el topbar */}
       <nav
-        className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-[#C9D9F5]/30 bg-gradient-to-r from-[#1E40AF] to-[#1D4ED8] text-[#DBEAFE] shadow-co-md lg:hidden"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-[#C9D9F5]/30 bg-gradient-to-r from-[#061D47] to-[#0B3D91] text-[#DBEAFE] shadow-co-md lg:hidden"
         aria-label="Navegación principal móvil"
       >
         <div className="mx-auto grid max-w-md grid-cols-3 gap-1 px-2 py-1.5">
@@ -182,7 +182,7 @@ export default function Sidebar({ activeModule, setActiveModule, alertCount = 0 
                 type="button"
                 onClick={() => handleSelect(module.id)}
                 className={`relative flex flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 transition-colors ${
-                  isActive ? 'bg-white text-[#1D4ED8] font-bold shadow-co-sm' : 'text-[#DBEAFE] hover:text-white hover:bg-white/10'
+                  isActive ? 'bg-white text-[#0B3D91] font-bold shadow-co-sm' : 'text-[#DBEAFE] hover:text-white hover:bg-white/10'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >

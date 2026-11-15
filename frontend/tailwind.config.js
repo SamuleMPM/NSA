@@ -43,7 +43,7 @@ export default {
           cyan: '#0EA5E9',   // azul de apoyo / cian Clean Orbit
           ice: '#DBEAFE',    // fondo azul suave
           sky: '#38BDF8',    // cian celeste
-          blue: '#1D4ED8',   // azul primario Clean Orbit
+          blue: '#0B3D91',   // azul navy primario
           green: '#047857',  // nominal Clean Orbit
           mint: '#10B981',
           amber: '#0369A1',  // advertencia Clean Orbit
@@ -62,12 +62,12 @@ export default {
       },
       boxShadow: {
         'hud': '0 1px 2px rgba(11,27,58,.06)',
-        'hud-glow': '0 8px 24px rgba(29,78,216,.14)',
+        'hud-glow': '0 8px 24px rgba(11,61,145,.16)',
         'hud-danger': '0 8px 24px rgba(225,29,72,.14)',
         'hud-warning': '0 8px 24px rgba(3,105,161,.14)',
         'panel': '0 1px 2px rgba(11,27,58,.06)',
         'co-sm': '0 1px 2px rgba(11,27,58,.06)',
-        'co-md': '0 8px 24px rgba(29,78,216,.14)',
+        'co-md': '0 8px 24px rgba(11,61,145,.16)',
       },
       backgroundImage: {
         'console-grid': 'linear-gradient(rgba(201, 217, 245, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 217, 245, 0.4) 1px, transparent 1px)',

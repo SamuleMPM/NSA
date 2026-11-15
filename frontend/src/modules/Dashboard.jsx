@@ -53,6 +53,7 @@ export default function Dashboard({
   onOpenHandbook,
   onOpenTelemetry,
   onOpenSimulator,
+  onOpenAddAstronaut,
 }) {
   const openAlerts = alerts.filter((alert) => alert.status === 'active' || alert.status === 'acknowledged');
   const overall = assessment?.overall;
@@ -161,6 +162,7 @@ export default function Dashboard({
             onOpenTab={setTab}
             onApplyCountermeasure={onApplyCountermeasure}
             onResetNominal={onResetNominal}
+            onOpenAddAstronaut={onOpenAddAstronaut}
           />
         ) : null}
 
@@ -199,6 +201,7 @@ export default function Dashboard({
             onSaveRecord={onSaveRecord}
             onDeleteRecord={onDeleteRecord}
             onOpenDictionary={onOpenDictionary}
+            onOpenAddAstronaut={onOpenAddAstronaut}
           />
         ) : null}
       </div>

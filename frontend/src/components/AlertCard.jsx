@@ -209,8 +209,8 @@ export default function AlertCard({
         {alert.recommendations?.length ? (
           <details className="group rounded-md border border-[#C9D9F5] bg-[#F8FAFD]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2.5 py-2">
-              <span className="mono flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#1D4ED8]">
-                <ClipboardList className="h-3 w-3 text-[#1D4ED8]" aria-hidden="true" />
+              <span className="mono flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#0B3D91]">
+                <ClipboardList className="h-3 w-3 text-[#0B3D91]" aria-hidden="true" />
                 Recomendaciones ({alert.recommendations.length})
               </span>
               <ChevronDown className="h-3.5 w-3.5 text-[#47598A] transition-transform group-open:rotate-180" aria-hidden="true" />
@@ -218,7 +218,7 @@ export default function AlertCard({
             <ol className="space-y-2 border-t border-[#C9D9F5] px-3 py-2.5">
               {alert.recommendations.map((recommendation, index) => (
                 <li key={`${recommendation.title}-${index}`} className="flex gap-2">
-                  <span className="mono mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[#C9D9F5] bg-white text-[8px] font-bold text-[#1D4ED8]">
+                  <span className="mono mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[#C9D9F5] bg-white text-[8px] font-bold text-[#0B3D91]">
                     {index + 1}
                   </span>
                   <div>

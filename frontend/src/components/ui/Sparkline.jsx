@@ -35,7 +35,7 @@ export default function Sparkline({
   values = [],
   width = 132,
   height = 40,
-  color = '#1D4ED8',
+  color = '#0B3D91',
   fill = true,
   strokeWidth = 1.6,
   className = '',

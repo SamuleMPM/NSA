@@ -17,14 +17,14 @@ export default function ModuleHeader({
           className="pointer-events-none absolute inset-y-0 left-0 w-48 opacity-60"
           style={{
             background:
-              'linear-gradient(90deg, rgba(29, 78, 216, 0.06), transparent 70%)',
+              'linear-gradient(90deg, rgba(11, 61, 145, 0.08), transparent 70%)',
           }}
           aria-hidden="true"
         />
 
         <div className="relative flex min-w-0 items-start gap-3.5">
           {Icon ? (
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8] shadow-co-sm">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91] shadow-co-sm">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
           ) : null}
@@ -36,7 +36,7 @@ export default function ModuleHeader({
               ) : null}
               <span className="eyebrow">{kicker}</span>
             </div>
-            <h1 className="font-heading text-[19px] font-extrabold leading-tight tracking-tight text-[#1D4ED8] sm:text-[23px]">
+            <h1 className="font-heading text-[19px] font-extrabold leading-tight tracking-tight text-[#0B3D91] sm:text-[23px]">
               {title}
             </h1>
             {description ? (

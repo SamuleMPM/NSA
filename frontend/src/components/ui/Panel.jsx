@@ -31,13 +31,13 @@ export function PanelHeader({
     >
       <div className="flex min-w-0 items-start gap-2.5">
         {Icon ? (
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]">
             <Icon className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
         ) : null}
         <div className="min-w-0">
           {kicker ? <span className="eyebrow block">{kicker}</span> : null}
-          <h3 className="truncate font-heading text-[13px] font-bold tracking-tight text-[#1D4ED8]">
+          <h3 className="truncate font-heading text-[13px] font-bold tracking-tight text-[#0B3D91]">
             {title}
           </h3>
           {description ? (

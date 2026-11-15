@@ -52,7 +52,7 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Frecuencia Cardíaca',
       short: 'HR',
       unit: 'bpm',
-      color: '#1D4ED8',
+      color: '#0B3D91',
       gradientId: 'grad-hr-co',
       icon: Heart,
       minRange: 45,
@@ -112,7 +112,7 @@ export default function TelemetryCharts({ history = [] }) {
       label: 'Glucosa en Sangre',
       short: 'GLUC',
       unit: 'mg/dL',
-      color: '#1E40AF',
+      color: '#061D47',
       gradientId: 'grad-gluc-co',
       icon: Apple,
       minRange: 60,
@@ -200,12 +200,12 @@ export default function TelemetryCharts({ history = [] }) {
     <section className="panel overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-[#C9D9F5] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]">
             <LineChart className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
           <div>
             <span className="eyebrow block">TEMPORAL ANALYSIS / MULTI-CHANNEL</span>
-            <h3 className="font-heading text-[13px] font-bold text-[#1D4ED8]">
+            <h3 className="font-heading text-[13px] font-bold text-[#0B3D91]">
               Evolución biomédica y tendencia temporal
             </h3>
           </div>
@@ -233,14 +233,14 @@ export default function TelemetryCharts({ history = [] }) {
                 onClick={() => setActiveMetric(key)}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[10px] font-semibold transition-colors ${
                   active
-                    ? 'border-[#1D4ED8] bg-[#DBEAFE] text-[#1D4ED8]'
+                    ? 'border-[#0B3D91] bg-[#DBEAFE] text-[#0B3D91]'
                     : 'border-[#C9D9F5] bg-white text-[#47598A] hover:bg-[#F8FAFD] hover:text-[#0B1B3A]'
                 }`}
                 aria-pressed={active}
               >
                 <Icon className="h-3 w-3" style={{ color: active ? cfg.color : undefined }} aria-hidden="true" />
                 <span>{cfg.short}</span>
-                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-[#1D4ED8]/70' : 'text-[#47598A]'}`}>
+                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-[#0B3D91]/70' : 'text-[#47598A]'}`}>
                   {cfg.unit}
                 </span>
               </button>

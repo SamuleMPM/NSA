@@ -40,7 +40,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos del astronauta',
     short: 'Astronauta',
     iconName: 'astronaut',
-    color: '#1D4ED8',
+    color: '#0B3D91',
     description: 'Identificación, demografía, rol y contexto de misión del tripulante.',
   },
   {
@@ -56,7 +56,7 @@ export const RECORD_CATEGORIES = [
     label: 'Datos de telemetría',
     short: 'Telemetría',
     iconName: 'telemetry',
-    color: '#1E40AF',
+    color: '#061D47',
     description: 'Calidad de señal, HRV, fuente y frecuencia de muestreo biomédico.',
   },
   {

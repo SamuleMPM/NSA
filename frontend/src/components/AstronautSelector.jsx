@@ -7,23 +7,28 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronRight,
+  UserPlus,
 } from 'lucide-react';
 import StatusPill from './ui/StatusPill';
 
 function roleCode(role = '') {
-  if (role.toLowerCase().includes('comandante')) return 'CDR';
-  if (role.toLowerCase().includes('biomédica')) return 'BMS';
-  if (role.toLowerCase().includes('ingeniero')) return 'FE';
+  const r = role.toLowerCase();
+  if (r.includes('comandante')) return 'CDR';
+  if (r.includes('biomédica') || r.includes('médic')) return 'BMS';
+  if (r.includes('ingeniero')) return 'FE';
+  if (r.includes('científic') || r.includes('investig')) return 'MS';
+  if (r.includes('piloto')) return 'PLT';
   return 'CREW';
 }
 
 function initials(name = '') {
   return name
     .split(' ')
+    .filter(Boolean)
     .map((part) => part[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase() || 'AS';
 }
 
 function vitalLevel(variable, value) {
@@ -58,190 +63,236 @@ export default function AstronautSelector({
   selectedId,
   onSelect,
   latestVitalsByAstronaut = {},
+  onOpenAddModal,
 }) {
+  const crewList = Object.entries(astronauts);
+
   return (
-    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-      {Object.entries(astronauts).map(([id, ast]) => {
-        const isSelected = id === selectedId;
-        const vitals = latestVitalsByAstronaut[id] || {};
-        const isEva = ast.activity === 'EVA';
-
-        const metrics = [
-          {
-            key: 'heart_rate',
-            label: 'HR',
-            value: vitals.heart_rate,
-            unit: 'bpm',
-            icon: Heart,
-            color: '#1D4ED8',
-          },
-          {
-            key: 'spo2',
-            label: 'SpO2',
-            value: vitals.spo2,
-            unit: '%',
-            icon: Activity,
-            color: '#0EA5E9',
-          },
-          {
-            key: 'temperature',
-            label: 'TEMP',
-            value: vitals.temperature,
-            unit: '°C',
-            icon: Thermometer,
-            color: '#2563EB',
-          },
-          {
-            key: 'respiratory_rate',
-            label: 'RR',
-            value: vitals.respiratory_rate,
-            unit: 'rpm',
-            icon: Wind,
-            color: '#38BDF8',
-          },
-        ];
-
-        const levels = metrics.map((metric) => vitalLevel(metric.key, metric.value));
-        const worstLevel = levels.includes('critical')
-          ? 'critical'
-          : levels.includes('warning')
-            ? 'warning'
-            : 'nominal';
-        const isCritical = worstLevel === 'critical';
-        const isWarning = worstLevel === 'warning';
-
-        return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between px-0.5">
+        <div className="flex items-center gap-2">
+          <span className="mono rounded border border-[#C9D9F5] bg-[#DBEAFE] px-2 py-0.5 text-[9px] font-bold text-[#0B3D91]">
+            TRIPULACIÓN ({crewList.length})
+          </span>
+          <span className="text-[11px] font-medium text-[#47598A]">
+            Enfoca la telemetría, visor 3D y evaluación clínica en un tripulante
+          </span>
+        </div>
+        {onOpenAddModal ? (
           <button
-            key={id}
             type="button"
-            onClick={() => onSelect(id)}
-            className={`panel group relative overflow-hidden p-3 text-left transition-all duration-150 ${
-              isCritical
-                ? 'panel-critical'
-                : isWarning
-                  ? 'panel-warning'
-                  : isSelected
-                    ? 'panel-active border-[#1D4ED8] bg-[#DBEAFE]/25 shadow-co-md'
-                    : 'panel-hover'
-            }`}
-            aria-pressed={isSelected}
+            onClick={onOpenAddModal}
+            className="btn btn-primary !h-7 !min-h-0 !py-1 !px-2.5 text-[10px]"
+            title="Agregar un nuevo astronauta a la misión"
           >
-            <span
-              className="absolute inset-x-0 top-0 h-[2px]"
-              style={{
-                background: isCritical
-                  ? 'linear-gradient(90deg, transparent, #A16207, transparent)'
-                  : isWarning
-                    ? 'linear-gradient(90deg, transparent, #0369A1, transparent)'
-                    : isSelected
-                      ? 'linear-gradient(90deg, transparent, #1D4ED8, transparent)'
-                      : 'transparent',
-              }}
-              aria-hidden="true"
-            />
+            <UserPlus className="h-3 w-3" aria-hidden="true" />
+            <span>+ Agregar astronauta</span>
+          </button>
+        ) : null}
+      </div>
 
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {crewList.map(([id, ast]) => {
+          const isSelected = id === selectedId;
+          const vitals = latestVitalsByAstronaut[id] || {};
+          const isEva = ast.activity === 'EVA';
+
+          const metrics = [
+            {
+              key: 'heart_rate',
+              label: 'HR',
+              value: vitals.heart_rate,
+              unit: 'bpm',
+              icon: Heart,
+              color: '#0B3D91',
+            },
+            {
+              key: 'spo2',
+              label: 'SpO2',
+              value: vitals.spo2,
+              unit: '%',
+              icon: Activity,
+              color: '#0EA5E9',
+            },
+            {
+              key: 'temperature',
+              label: 'TEMP',
+              value: vitals.temperature,
+              unit: '°C',
+              icon: Thermometer,
+              color: '#0B3D91',
+            },
+            {
+              key: 'respiratory_rate',
+              label: 'RR',
+              value: vitals.respiratory_rate,
+              unit: 'rpm',
+              icon: Wind,
+              color: '#38BDF8',
+            },
+          ];
+
+          const levels = metrics.map((metric) => vitalLevel(metric.key, metric.value));
+          const worstLevel = levels.includes('critical')
+            ? 'critical'
+            : levels.includes('warning')
+              ? 'warning'
+              : 'nominal';
+          const isCritical = worstLevel === 'critical';
+          const isWarning = worstLevel === 'warning';
+
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onSelect(id)}
+              className={`panel group relative overflow-hidden p-3 text-left transition-all duration-150 ${
+                isCritical
+                  ? 'panel-critical'
+                  : isWarning
+                    ? 'panel-warning'
+                    : isSelected
+                      ? 'panel-active border-[#0B3D91] bg-[#DBEAFE]/35 shadow-co-md'
+                      : 'panel-hover'
+              }`}
+              aria-pressed={isSelected}
+            >
+              <span
+                className="absolute inset-x-0 top-0 h-[2px]"
+                style={{
+                  background: isCritical
+                    ? 'linear-gradient(90deg, transparent, #A16207, transparent)'
+                    : isWarning
+                      ? 'linear-gradient(90deg, transparent, #0369A1, transparent)'
+                      : isSelected
+                        ? 'linear-gradient(90deg, transparent, #0B3D91, transparent)'
+                        : 'transparent',
+                }}
+                aria-hidden="true"
+              />
+
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-heading text-[11px] font-extrabold ${
+                      isCritical
+                        ? 'border-[#FDE68A] bg-[#FEF3C7] text-[#A16207]'
+                        : isWarning
+                          ? 'border-[#BAE6FD] bg-[#E0F2FE] text-[#0369A1]'
+                          : isSelected
+                            ? 'border-[#0B3D91] bg-[#0B3D91] text-white shadow-sm'
+                            : 'border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]'
+                    }`}
+                  >
+                    {initials(ast.name)}
+                  </span>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate font-heading text-[12.5px] font-bold text-[#0B1B3A]">
+                        {ast.name}
+                      </span>
+                      <span className="mono text-[8.5px] text-[#47598A]">{roleCode(ast.role)}</span>
+                      {isCritical || isWarning ? (
+                        <AlertTriangle
+                          className={`h-3 w-3 shrink-0 ${isCritical ? 'text-[#A16207]' : 'text-[#0369A1]'}`}
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                    </div>
+                    <span className="mono mt-0.5 block truncate text-[9px] text-[#47598A]">
+                      {id.toUpperCase()} · {ast.role}
+                    </span>
+                  </div>
+                </div>
+
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-heading text-[11px] font-extrabold ${
-                    isCritical
-                      ? 'border-[#FDE68A] bg-[#FEF3C7] text-[#A16207]'
-                      : isWarning
-                        ? 'border-[#BAE6FD] bg-[#E0F2FE] text-[#0369A1]'
-                        : isSelected
-                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
-                          : 'border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]'
+                  className={`mono shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold ${
+                    isSelected
+                      ? 'border-[#0B3D91] bg-[#0B3D91] text-white'
+                      : isEva
+                        ? 'border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]'
+                        : 'border-[#C9D9F5] bg-white text-[#47598A]'
                   }`}
                 >
-                  {initials(ast.name)}
+                  {ast.activity}
                 </span>
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate font-heading text-[12.5px] font-bold text-[#0B1B3A]">
-                      {ast.name}
-                    </span>
-                    <span className="mono text-[8.5px] text-[#47598A]">{roleCode(ast.role)}</span>
-                    {isCritical || isWarning ? (
-                      <AlertTriangle
-                        className={`h-3 w-3 shrink-0 ${isCritical ? 'text-[#A16207]' : 'text-[#0369A1]'}`}
-                        aria-hidden="true"
-                      />
-                    ) : null}
-                  </div>
-                  <span className="mono mt-0.5 block truncate text-[9px] text-[#47598A]">
-                    {id.toUpperCase()} · {ast.role}
-                  </span>
-                </div>
               </div>
 
-              <span
-                className={`mono shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold ${
-                  isSelected
-                    ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
-                    : isEva
-                      ? 'border-[#C9D9F5] bg-[#DBEAFE] text-[#1D4ED8]'
-                      : 'border-[#C9D9F5] bg-white text-[#47598A]'
-                }`}
-              >
-                {ast.activity}
-              </span>
-            </div>
+              <div className="mt-2.5 grid grid-cols-4 gap-1.5">
+                {metrics.map((metric) => {
+                  const Icon = metric.icon;
+                  const level = vitalLevel(metric.key, metric.value);
+                  const metricColor =
+                    level === 'critical' ? '#A16207' : level === 'warning' ? '#0369A1' : metric.color;
+                  return (
+                    <div key={metric.key} className="panel-inset px-1.5 py-1.5">
+                      <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-[#47598A]">
+                        <Icon className="h-2.5 w-2.5" style={{ color: metricColor }} aria-hidden="true" />
+                        {metric.label}
+                      </span>
+                      <span
+                        className={`mono mt-1 block text-[10.5px] font-bold ${
+                          level === 'critical'
+                            ? 'text-[#A16207]'
+                            : level === 'warning'
+                              ? 'text-[#0369A1]'
+                              : 'text-[#0B1B3A]'
+                        }`}
+                      >
+                        {metric.value ?? '--'}
+                        <span className="ml-0.5 text-[7.5px] font-normal text-[#47598A]">{metric.unit}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-            <div className="mt-2.5 grid grid-cols-4 gap-1.5">
-              {metrics.map((metric) => {
-                const Icon = metric.icon;
-                const level = vitalLevel(metric.key, metric.value);
-                const metricColor =
-                  level === 'critical' ? '#A16207' : level === 'warning' ? '#0369A1' : metric.color;
-                return (
-                  <div key={metric.key} className="panel-inset px-1.5 py-1.5">
-                    <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-[#47598A]">
-                      <Icon className="h-2.5 w-2.5" style={{ color: metricColor }} aria-hidden="true" />
-                      {metric.label}
-                    </span>
-                    <span
-                      className={`mono mt-1 block text-[10.5px] font-bold ${
-                        level === 'critical'
-                          ? 'text-[#A16207]'
-                          : level === 'warning'
-                            ? 'text-[#0369A1]'
-                            : 'text-[#0B1B3A]'
-                      }`}
-                    >
-                      {metric.value ?? '--'}
-                      <span className="ml-0.5 text-[7.5px] font-normal text-[#47598A]">{metric.unit}</span>
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+              <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#C9D9F5] pt-1.5">
+                <StatusPill
+                  status={isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'}
+                  dot={false}
+                >
+                  {isCritical || isWarning ? (
+                    <>
+                      <AlertTriangle className="mr-1 inline h-2.5 w-2.5" aria-hidden="true" />
+                      {isCritical ? 'CRÍTICO' : 'ADVERTENCIA'}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-1 inline h-2.5 w-2.5" aria-hidden="true" />
+                      NOMINAL
+                    </>
+                  )}
+                </StatusPill>
+                <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-[#47598A] group-hover:text-[#0B3D91]">
+                  TELEMETRÍA
+                  <ChevronRight className="h-2.5 w-2.5" aria-hidden="true" />
+                </span>
+              </div>
+            </button>
+          );
+        })}
 
-            <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#C9D9F5] pt-1.5">
-              <StatusPill
-                status={isCritical ? 'critical' : isWarning ? 'warning' : 'nominal'}
-                dot={false}
-              >
-                {isCritical || isWarning ? (
-                  <>
-                    <AlertTriangle className="mr-1 inline h-2.5 w-2.5" aria-hidden="true" />
-                    {isCritical ? 'CRÍTICO' : 'ADVERTENCIA'}
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="mr-1 inline h-2.5 w-2.5" aria-hidden="true" />
-                    NOMINAL
-                  </>
-                )}
-              </StatusPill>
-              <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-[#47598A] group-hover:text-[#1D4ED8]">
-                TELEMETRÍA
-                <ChevronRight className="h-2.5 w-2.5" aria-hidden="true" />
-              </span>
-            </div>
+        {onOpenAddModal ? (
+          <button
+            type="button"
+            onClick={onOpenAddModal}
+            className="panel panel-hover group relative flex min-h-[160px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#C9D9F5] bg-white/60 p-4 text-center transition-all hover:border-[#0B3D91] hover:bg-[#DBEAFE]/30"
+            aria-label="Agregar nuevo astronauta"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91] shadow-co-sm transition-transform duration-200 group-hover:scale-110">
+              <UserPlus className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span className="mt-2.5 font-heading text-[12.5px] font-bold text-[#0B3D91]">
+              + Agregar astronauta
+            </span>
+            <span className="mono mt-1 text-[9px] text-[#47598A]">
+              Incorporar nuevo tripulante
+            </span>
           </button>
-        );
-      })}
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function Header({
   const connection = CONNECTION_STATES[backendStatus] || CONNECTION_STATES.connecting;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#C9D9F5]/30 bg-gradient-to-r from-[#1D4ED8] to-[#0EA5E9] text-white shadow-sm">
+    <header className="sticky top-0 z-30 border-b border-[#C9D9F5]/30 bg-gradient-to-r from-[#061D47] via-[#0B3D91] to-[#0D47A1] text-white shadow-sm">
       <div className="mx-auto flex h-[60px] w-full max-w-[1680px] items-center justify-between gap-4 px-4 sm:px-6">
         {/* Logo + nombre del sistema */}
         <div className="flex min-w-0 items-center gap-3">

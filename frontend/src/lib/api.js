@@ -123,6 +123,10 @@ export const api = {
 
   listCrew: async () => unwrap(await request('/crew')),
 
+  createCrew: async (profile) => unwrap(await request('/crew', { method: 'POST', body: profile })),
+
+  replaceCrew: async (crew) => unwrap(await request('/crew', { method: 'PUT', body: { crew } })),
+
   updateCrew: async (id, profile) => unwrap(await request(`/crew/${encodeURIComponent(id)}`, { method: 'PUT', body: profile })),
 };
 

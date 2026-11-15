@@ -331,8 +331,11 @@ async function handleApi(req, res, db, url) {
 
   if (pathname === '/api/crew' && method === 'POST') {
     const body = await readJsonBody(req, BODY_LIMIT_BYTES);
+    if (!body.id) {
+      const existing = listCrew(db);
+      body.id = `ast_${String(existing.length + 1).padStart(3, '0')}`;
+    }
     const profile = normalizeCrewInput(body);
-    if (!profile.id) throw badRequest('El perfil requiere "id".');
     const saved = upsertCrew(db, profile);
     sendJson(res, 201, jsonData(saved));
     return;

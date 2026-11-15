@@ -156,6 +156,7 @@ export default function DataEntry({
   onSaveRecord,
   onDeleteRecord,
   onOpenDictionary,
+  onOpenAddAstronaut,
 }) {
   const [category, setCategory] = useState('vitals');
   const [values, setValues] = useState({});
@@ -348,6 +349,16 @@ export default function DataEntry({
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
+              {category === 'astronaut' && onOpenAddAstronaut ? (
+                <button
+                  type="button"
+                  onClick={onOpenAddAstronaut}
+                  className="btn btn-primary !h-7 !min-h-0 !py-1 !px-2.5 text-[10px]"
+                >
+                  <UserRound className="h-3 w-3" />
+                  <span>+ Nuevo tripulante</span>
+                </button>
+              ) : null}
               <StatusPill status="info" dot={false}>VALIDACIÓN ACTIVA</StatusPill>
               {editingId ? (
                 <button type="button" onClick={resetForm} className="btn btn-ghost">

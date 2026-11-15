@@ -15,8 +15,8 @@ const METRIC_META = {
   heart_rate: {
     code: 'HR',
     icon: Heart,
-    accent: '#1D4ED8',
-    spark: '#1D4ED8',
+    accent: '#0B3D91',
+    spark: '#0B3D91',
     stroke: 'from-blue-600/70',
   },
   spo2: {
@@ -98,7 +98,7 @@ export default function VitalCard({
           : 'text-[#E11D48] bg-[#FFE4E6] border-[#FDA4AF]'
         : delta > 0
           ? 'text-[#A16207] bg-[#FEF3C7] border-[#FDE68A]'
-          : 'text-[#1D4ED8] bg-[#DBEAFE] border-[#C9D9F5]';
+          : 'text-[#0B3D91] bg-[#DBEAFE] border-[#C9D9F5]';
 
   return (
     <article
@@ -129,7 +129,7 @@ export default function VitalCard({
               <span className="h-2.5 w-px bg-[#C9D9F5]" />
               <span className="mono text-[9px] text-[#47598A]">REF {normalRange}</span>
             </div>
-            <h3 className="mt-0.5 truncate font-heading text-[12.5px] font-bold tracking-tight text-[#1D4ED8]">
+            <h3 className="mt-0.5 truncate font-heading text-[12.5px] font-bold tracking-tight text-[#0B3D91]">
               {title}
             </h3>
           </div>

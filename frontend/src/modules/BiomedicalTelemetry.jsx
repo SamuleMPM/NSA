@@ -68,6 +68,7 @@ export default function BiomedicalTelemetry({
   hasGlobalAlert = false,
   onOpenAlerts,
   onOpenData,
+  onOpenAddAstronaut,
 }) {
   const [viewMode, setViewMode] = useState('xray');
   const [selectedOrganId, setSelectedOrganId] = useState('heart');
@@ -151,6 +152,7 @@ export default function BiomedicalTelemetry({
           selectedId={selectedAstronautId}
           onSelect={setSelectedAstronautId}
           latestVitalsByAstronaut={latestVitalsByAstronaut}
+          onOpenAddModal={onOpenAddAstronaut}
         />
       </section>
 

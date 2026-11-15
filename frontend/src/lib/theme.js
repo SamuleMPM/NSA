@@ -11,9 +11,9 @@ export const CLEAN_ORBIT = {
   textPrimary: '#0B1B3A',
   textSecondary: '#47598A',
 
-  /* B. Azul principal (identidad dominante) */
-  primary: '#1D4ED8',
-  primaryDeep: '#1E40AF',
+  /* B. Azul principal (identidad dominante navy) */
+  primary: '#0B3D91',
+  primaryDeep: '#061D47',
   cyan: '#0EA5E9',
   blueSoft: '#DBEAFE',
 
@@ -31,7 +31,7 @@ export const CLEAN_ORBIT = {
 
   /* 5. Sombras suaves y discretas */
   shadowSm: '0 1px 2px rgba(11,27,58,.06)',
-  shadowMd: '0 8px 24px rgba(29,78,216,.14)',
+  shadowMd: '0 8px 24px rgba(11,61,145,.16)',
 };
 
 export default CLEAN_ORBIT;

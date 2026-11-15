@@ -6,6 +6,7 @@ import BiomedicalTelemetry from './modules/BiomedicalTelemetry';
 import MissionSimulator from './modules/MissionSimulator';
 import MedicalHandbook from './modules/MedicalHandbook';
 import DataDictionaryModal from './components/DataDictionaryModal';
+import AddAstronautModal from './components/AddAstronautModal';
 import { Radio, X, BookOpen } from 'lucide-react';
 import {
   ALERTABLE_VITALS,
@@ -126,6 +127,7 @@ export default function App() {
   const [isAutoSimulating, setIsAutoSimulating] = useState(true);
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
   const [isHandbookOpen, setIsHandbookOpen] = useState(false);
+  const [isAddAstronautOpen, setIsAddAstronautOpen] = useState(false);
 
   const [crewSeed, setCrewSeed] = useState(() => {
     const cached = readJSON(STORAGE_KEYS.crew, null);
@@ -384,7 +386,9 @@ export default function App() {
 
   useEffect(() => {
     writeJSON(STORAGE_KEYS.crew, Object.values(crewSeed));
-  }, [crewSeed]);
+    if (!hydrated) return;
+    runSync('crew', () => api.replaceCrew(Object.values(crewSeed)));
+  }, [crewSeed, hydrated, syncEpoch, runSync]);
 
   const addLog = useCallback((level, message) => {
     setLogs((previous) => [
@@ -397,7 +401,7 @@ export default function App() {
     (scenarioOverride = null) => {
       setTelemetryHistory((previous) => {
         const next = { ...previous };
-        Object.keys(crewSeed).forEach((id) => {
+        Object.keys(crew).forEach((id) => {
           const scenario =
             scenarioOverride ||
             (id === selectedAstronautId ? currentScenario : id === 'ast_003' ? 'sleep' : 'microgravity');
@@ -407,7 +411,7 @@ export default function App() {
       });
       setEnvironmentalData(calculateEnvironmentalData(environment));
     },
-    [selectedAstronautId, currentScenario, currentEnvironment, environment, crewSeed],
+    [selectedAstronautId, currentScenario, currentEnvironment, environment, crew],
   );
 
   useEffect(() => {
@@ -503,6 +507,72 @@ export default function App() {
     addLog('SUCCESS', 'Alerta marcada como resuelta por el operador.');
   };
 
+  const handleAddAstronaut = useCallback(
+    (profile) => {
+      const crewCount = Object.keys(crew).length;
+      const defaultId = `ast_${String(crewCount + 1).padStart(3, '0')}`;
+      const id = (profile.id && profile.id.trim())
+        ? profile.id.trim().toLowerCase().replace(/\s+/g, '_')
+        : defaultId;
+
+      const newProfile = {
+        id,
+        name: profile.name?.trim() || 'Nuevo Tripulante',
+        role: profile.role?.trim() || 'Especialista de Misión',
+        activity: profile.activity || 'IVA',
+        age: Number(profile.age) || 38,
+        sex: profile.sex || 'O',
+        heightCm: profile.heightCm ? Number(profile.heightCm) : null,
+        weightKg: profile.weightKg ? Number(profile.weightKg) : null,
+        bloodType: profile.bloodType || 'O+',
+        missionDays: Number(profile.missionDays) || 0,
+      };
+
+      setCrewSeed((previous) => ({
+        ...previous,
+        [id]: newProfile,
+      }));
+
+      const initialHistory = Array.from({ length: 13 }, () =>
+        generateSyntheticSample(newProfile.activity === 'EVA' ? 'eva' : 'microgravity', currentEnvironment)
+      );
+      setTelemetryHistory((previous) => ({
+        ...previous,
+        [id]: initialHistory,
+      }));
+
+      const record = createRecord({
+        category: 'astronaut',
+        data: {
+          astronautId: id,
+          fullName: newProfile.name,
+          role: newProfile.role,
+          activity: newProfile.activity,
+          age: newProfile.age,
+          sex: newProfile.sex,
+          heightCm: newProfile.heightCm,
+          weightKg: newProfile.weightKg,
+          bloodType: newProfile.bloodType,
+          missionDays: newProfile.missionDays,
+          notes: profile.notes || 'Tripulante incorporado a la tripulación oficial.',
+        },
+      });
+      setRecords((previous) => [record, ...previous]);
+
+      setSelectedAstronautId(id);
+
+      runSync('crew', () => api.createCrew(newProfile));
+
+      addLog(
+        'SUCCESS',
+        `Nuevo tripulante incorporado a la misión: ${newProfile.name} (${id.toUpperCase()}) · ${newProfile.role} [${newProfile.activity}].`,
+      );
+
+      return newProfile;
+    },
+    [crew, currentEnvironment, runSync, addLog],
+  );
+
   const handleSaveRecord = ({ category, data, existingId }) => {
     const existing = existingId ? records.find((record) => record.id === existingId) : null;
     const record = createRecord({ category, data, existing });
@@ -510,6 +580,34 @@ export default function App() {
     setRecords((previous) =>
       existing ? previous.map((item) => (item.id === record.id ? record : item)) : [record, ...previous],
     );
+
+    if (category === 'astronaut') {
+      const astId = record.data?.astronautId;
+      if (astId) {
+        setCrewSeed((previous) => ({
+          ...previous,
+          [astId]: {
+            id: astId,
+            name: record.data.fullName || previous[astId]?.name || astId,
+            role: record.data.role || previous[astId]?.role || 'Tripulante',
+            activity: record.data.activity || previous[astId]?.activity || 'IVA',
+            age: record.data.age ?? previous[astId]?.age ?? null,
+            sex: record.data.sex ?? previous[astId]?.sex ?? null,
+            heightCm: record.data.heightCm ?? previous[astId]?.heightCm ?? null,
+            weightKg: record.data.weightKg ?? previous[astId]?.weightKg ?? null,
+            bloodType: record.data.bloodType ?? previous[astId]?.bloodType ?? null,
+            missionDays: record.data.missionDays ?? previous[astId]?.missionDays ?? 0,
+          },
+        }));
+        setTelemetryHistory((previous) => {
+          if (previous[astId]?.length) return previous;
+          return {
+            ...previous,
+            [astId]: Array.from({ length: 13 }, () => generateSyntheticSample('microgravity', currentEnvironment)),
+          };
+        });
+      }
+    }
 
     if (category === 'vitals') {
       setSuppressedVitalsIds((previous) => previous.filter((id) => id !== record.id));
@@ -634,6 +732,7 @@ export default function App() {
                   onOpenHandbook={() => setIsHandbookOpen(true)}
                   onOpenTelemetry={() => setActiveModule('telemetry')}
                   onOpenSimulator={() => setActiveModule('simulator')}
+                  onOpenAddAstronaut={() => setIsAddAstronautOpen(true)}
                 />
               ) : null}
 
@@ -654,6 +753,7 @@ export default function App() {
                   hasGlobalAlert={hasGlobalAlert}
                   onOpenAlerts={() => openDashboardTab('alerts')}
                   onOpenData={() => openDashboardTab('data')}
+                  onOpenAddAstronaut={() => setIsAddAstronautOpen(true)}
                 />
               ) : null}
 
@@ -734,6 +834,12 @@ export default function App() {
       ) : null}
 
       <DataDictionaryModal isOpen={isDictionaryOpen} onClose={() => setIsDictionaryOpen(false)} />
+      <AddAstronautModal
+        isOpen={isAddAstronautOpen}
+        onClose={() => setIsAddAstronautOpen(false)}
+        onAddAstronaut={handleAddAstronaut}
+        existingCrewCount={Object.keys(crew).length}
+      />
     </div>
   );
 }

@@ -19,9 +19,9 @@
     --co-text-primary: #0B1B3A;
     --co-text-secondary: #47598A;
 
-    /* B. Azul principal (identidad dominante) */
-    --co-primary: #1D4ED8;
-    --co-primary-deep: #1E40AF;
+    /* B. Azul principal (identidad dominante navy) */
+    --co-primary: #0B3D91;
+    --co-primary-deep: #061D47;
     --co-cyan: #0EA5E9;
     --co-blue-soft: #DBEAFE;
 
@@ -39,7 +39,7 @@
 
     /* 5. Sombras suaves y discretas */
     --co-shadow-sm: 0 1px 2px rgba(11, 27, 58, 0.06);
-    --co-shadow-md: 0 8px 24px rgba(29, 78, 216, 0.14);
+    --co-shadow-md: 0 8px 24px rgba(11, 61, 145, 0.16);
 
     /* Aliases de compatibilidad para tokens del sistema */
     --void: var(--co-background);
@@ -279,7 +279,7 @@
   }
 
   /* ---------------------------------------------------------------------
-     Buttons (Clean Orbit: Primarios #1D4ED8, Hover #1E40AF, Secundarios blancos)
+     Buttons (Clean Orbit Navy: Primarios #0B3D91, Hover #061D47, Secundarios blancos)
      --------------------------------------------------------------------- */
   .btn {
     display: inline-flex;
@@ -328,7 +328,7 @@
   .btn-primary:hover {
     background: var(--co-primary-deep);
     color: #FFFFFF;
-    border-color: #1E3A8A;
+    border-color: #041433;
   }
 
   .btn-ghost {
@@ -694,7 +694,7 @@
     transition: width 380ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .rail-cyan { background: linear-gradient(90deg, #1D4ED8, #0EA5E9); }
+  .rail-cyan { background: linear-gradient(90deg, #0B3D91, #0EA5E9); }
   .rail-green { background: linear-gradient(90deg, #047857, #10B981); }
   .rail-amber { background: linear-gradient(90deg, #0369A1, #0EA5E9); }
   .rail-red { background: linear-gradient(90deg, #BE123C, #E11D48); }
