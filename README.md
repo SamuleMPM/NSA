@@ -135,8 +135,9 @@ Las misiones espaciales de larga duración exponen a los astronautas al hostil e
 ## 💻 Instalación y Ejecución Local
 
 ### Prerrequisitos
-- **Node.js** v18 o superior.
-- **npm** o **pnpm**.
+- **Node.js** v24 recomendado para el backend (usa `node:sqlite` nativo). El
+  frontend funciona desde v18.
+- **npm**.
 
 ### Pasos de Instalación
 
@@ -151,14 +152,33 @@ Las misiones espaciales de larga duración exponen a los astronautas al hostil e
    npm install
    ```
 
-3. Iniciar el servidor de desarrollo Vite:
+3. Iniciar la API REST + SQLite (crea `backend/data/aerohealth.db`):
    ```bash
+   cd ../backend
+   npm start
+   ```
+
+4. En otra terminal, iniciar la consola Vite:
+   ```bash
+   cd frontend
    npm run dev
    ```
 
-4. Abrir en el navegador en la URL indicada (habitualmente `http://localhost:5173`).
+5. Abrir `http://localhost:3000`. El Header mostrará **API · SQLite** cuando la
+   persistencia esté conectada.
 
-*(En entornos Windows también puede ejecutarse haciendo doble clic en `iniciar_frontend.bat`).*
+*(En Windows también puede ejecutarse `iniciar_frontend.bat`, que levanta API y
+frontend juntos, o `iniciar_backend.bat` para solo la API).*
+
+### API y base de datos
+
+- API REST documentada: [`backend/README.md`](backend/README.md).
+- SQLite se crea y migra automáticamente; la semilla incluye tres tripulantes.
+- Si existían datos de la versión anterior en `localStorage`, se importan una
+  sola vez a SQLite.
+- Para producción: `cd frontend && npm run build` y luego `cd backend && npm start`
+  sirve la consola y la API en `http://127.0.0.1:4000`.
+- Pruebas del backend: `cd backend && npm test`.
 
 ---
 

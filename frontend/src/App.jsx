@@ -47,9 +47,17 @@ import {
   loadRiskHistory,
   loadSuppressedVitals,
   createId,
+  readJSON,
   writeJSON,
   STORAGE_KEYS,
 } from './lib/storage';
+import { api, describeApiError } from './lib/api';
+import {
+  crewArrayToMap,
+  hydrateFromBackend,
+  readLocalSnapshot,
+  scheduleSync,
+} from './lib/persistence';
 import { formatTime } from './lib/format';
 
 const SESSION_USER = {
@@ -119,6 +127,10 @@ export default function App() {
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
   const [isHandbookOpen, setIsHandbookOpen] = useState(false);
 
+  const [crewSeed, setCrewSeed] = useState(() => {
+    const cached = readJSON(STORAGE_KEYS.crew, null);
+    return Array.isArray(cached) && cached.length ? crewArrayToMap(cached) : CREW_SEED;
+  });
   const [records, setRecords] = useState(() => loadRecords());
   const [alerts, setAlerts] = useState(() => loadAlerts());
   const [logs, setLogs] = useState(() => {
@@ -127,13 +139,16 @@ export default function App() {
   });
   const [riskHistory, setRiskHistory] = useState(() => loadRiskHistory());
   const [suppressedVitalsIds, setSuppressedVitalsIds] = useState(() => loadSuppressedVitals());
-  const [telemetryHistory, setTelemetryHistory] = useState(() => generateHistoryForCrew(CREW_SEED, 'transit'));
+  const [telemetryHistory, setTelemetryHistory] = useState(() => generateHistoryForCrew(crewSeed, 'transit'));
   const [environmentalData, setEnvironmentalData] = useState(() =>
     calculateEnvironmentalData(getEnvironment('transit')),
   );
+  const [hydrated, setHydrated] = useState(false);
+  const [backendStatus, setBackendStatus] = useState('connecting');
+  const [syncEpoch, setSyncEpoch] = useState(0);
 
   const environment = useMemo(() => getEnvironment(currentEnvironment), [currentEnvironment]);
-  const crew = useMemo(() => mergeCrewProfiles(CREW_SEED, records), [records]);
+  const crew = useMemo(() => mergeCrewProfiles(crewSeed, records), [crewSeed, records]);
   const recordSummary = useMemo(() => summarizeRecords(records), [records]);
   const environmentRecord = useMemo(() => getLatestRecord(records, 'environment'), [records]);
   const simulationRecord = useMemo(() => getLatestRecord(records, 'simulation'), [records]);
@@ -194,6 +209,76 @@ export default function App() {
   const evaluations = useMemo(() => evaluateAllVitals(selectedLatest), [selectedLatest]);
   const hasGlobalAlert = ALERTABLE_VITALS.some((key) => severityAtLeast(evaluations[key]?.status, 'critical'));
   const alertSummary = useMemo(() => summarizeAlerts(alerts), [alerts]);
+
+  const runSync = useCallback((key, task) => {
+    scheduleSync(key, task, ({ ok, error }) => {
+      if (ok) {
+        setBackendStatus((previous) => (previous === 'online' ? previous : 'online'));
+        return;
+      }
+      setBackendStatus('offline');
+      if (error?.code !== 'network_error') {
+        console.warn(`[AeroHealth] Fallo de sincronización (${key}): ${describeApiError(error)}`);
+      }
+    });
+  }, []);
+
+  /**
+   * Hidratación inicial: SQLite manda. Si la base está vacía, se importa una
+   * sola vez la caché localStorage de versiones anteriores de la consola.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const localSnapshot = readLocalSnapshot();
+
+    (async () => {
+      try {
+        const { snapshot, migrated } = await hydrateFromBackend(localSnapshot);
+        if (cancelled) return;
+
+        setRecords(Array.isArray(snapshot.records) ? snapshot.records : []);
+        setAlerts(Array.isArray(snapshot.alerts) ? snapshot.alerts : []);
+        if (Array.isArray(snapshot.logs) && snapshot.logs.length) setLogs(snapshot.logs);
+        setRiskHistory(Array.isArray(snapshot.riskHistory) ? snapshot.riskHistory : []);
+        setSuppressedVitalsIds(Array.isArray(snapshot.suppressedVitals) ? snapshot.suppressedVitals : []);
+        if (Array.isArray(snapshot.crew) && snapshot.crew.length) {
+          setCrewSeed(crewArrayToMap(snapshot.crew));
+        }
+        if (migrated) {
+          setLogs((previous) => [
+            ...previous.slice(-119),
+            {
+              time: formatTime(new Date()),
+              level: 'SUCCESS',
+              message: 'Migración localStorage → SQLite completada.',
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+        }
+        setBackendStatus('online');
+      } catch (error) {
+        if (cancelled) return;
+        console.warn(`[AeroHealth] ${describeApiError(error)}. La consola continúa en modo local.`);
+        setBackendStatus('offline');
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Al recuperar la conexión se reintenta el volcado completo del estado.
+  useEffect(() => {
+    const handleOnline = () => {
+      setBackendStatus('connecting');
+      setSyncEpoch((value) => value + 1);
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   const missionDays = crew[selectedAstronautId]?.missionDays ?? 62;
   const riskInputsBundle = useMemo(
@@ -266,23 +351,40 @@ export default function App() {
 
   useEffect(() => {
     writeJSON(STORAGE_KEYS.records, records);
-  }, [records]);
+    if (!hydrated) return;
+    runSync('records', () => api.replaceRecords(records));
+  }, [records, hydrated, syncEpoch, runSync]);
 
   useEffect(() => {
-    writeJSON(STORAGE_KEYS.suppressedVitals, suppressedVitalsIds.slice(-120));
-  }, [suppressedVitalsIds]);
+    const suppressed = suppressedVitalsIds.slice(-120);
+    writeJSON(STORAGE_KEYS.suppressedVitals, suppressed);
+    if (!hydrated) return;
+    runSync('suppressed-vitals', () => api.replaceSuppressedVitals(suppressed));
+  }, [suppressedVitalsIds, hydrated, syncEpoch, runSync]);
 
   useEffect(() => {
     writeJSON(STORAGE_KEYS.alerts, alerts);
-  }, [alerts]);
+    if (!hydrated) return;
+    runSync('alerts', () => api.replaceAlerts(alerts));
+  }, [alerts, hydrated, syncEpoch, runSync]);
 
   useEffect(() => {
-    writeJSON(STORAGE_KEYS.logs, logs.slice(-120));
-  }, [logs]);
+    const recent = logs.slice(-120);
+    writeJSON(STORAGE_KEYS.logs, recent);
+    if (!hydrated) return;
+    runSync('logs', () => api.replaceLogs(recent));
+  }, [logs, hydrated, syncEpoch, runSync]);
 
   useEffect(() => {
-    writeJSON(STORAGE_KEYS.riskHistory, riskHistory.slice(0, 60));
-  }, [riskHistory]);
+    const recent = riskHistory.slice(0, 60);
+    writeJSON(STORAGE_KEYS.riskHistory, recent);
+    if (!hydrated) return;
+    runSync('risk-history', () => api.replaceRiskHistory(recent));
+  }, [riskHistory, hydrated, syncEpoch, runSync]);
+
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.crew, Object.values(crewSeed));
+  }, [crewSeed]);
 
   const addLog = useCallback((level, message) => {
     setLogs((previous) => [
@@ -295,7 +397,7 @@ export default function App() {
     (scenarioOverride = null) => {
       setTelemetryHistory((previous) => {
         const next = { ...previous };
-        Object.keys(CREW_SEED).forEach((id) => {
+        Object.keys(crewSeed).forEach((id) => {
           const scenario =
             scenarioOverride ||
             (id === selectedAstronautId ? currentScenario : id === 'ast_003' ? 'sleep' : 'microgravity');
@@ -305,7 +407,7 @@ export default function App() {
       });
       setEnvironmentalData(calculateEnvironmentalData(environment));
     },
-    [selectedAstronautId, currentScenario, currentEnvironment, environment],
+    [selectedAstronautId, currentScenario, currentEnvironment, environment, crewSeed],
   );
 
   useEffect(() => {
@@ -497,7 +599,7 @@ export default function App() {
       />
 
       <div className="relative z-10 flex min-h-screen min-w-0 flex-1 flex-col">
-        <Header user={SESSION_USER} />
+        <Header user={SESSION_USER} backendStatus={backendStatus} />
 
         <main className="flex-1 w-full">
           <div className="mx-auto w-full max-w-[1680px] px-3.5 pb-24 pt-4 sm:px-5 sm:pt-5 lg:px-6 lg:pb-6">
@@ -600,7 +702,7 @@ export default function App() {
               <span className="text-slate-700">/</span>
               <span className="flex items-center gap-1.5 text-telemetry-green">
                 <span className="h-1.5 w-1.5 rounded-full bg-telemetry-green" />
-                BUILD 2.0.0
+                BUILD 2.1.0 · API
               </span>
             </div>
           </div>

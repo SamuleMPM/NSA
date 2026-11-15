@@ -384,7 +384,7 @@ export default function DataEntry({
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-space-700/60 pt-3">
               <span className="mono flex items-center gap-1.5 text-[8.5px] text-slate-600">
                 <Database className="h-3 w-3 text-telemetry-cyan" aria-hidden="true" />
-                Persistencia local · listo para API futura
+                Persistencia API REST · SQLite
               </span>
               <div className="flex flex-wrap items-center gap-1.5">
                 <button type="button" onClick={handleExport} className="btn">

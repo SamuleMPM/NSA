@@ -1,9 +1,9 @@
 /**
- * Persistencia local de la consola.
+ * Caché local de la consola.
  *
- * El repositorio no incluye backend funcional (backend/README.md es un
- * placeholder). La aplicación usa localStorage detrás de esta abstracción para
- * que pueda sustituirse por una API REST sin tocar los módulos.
+ * La fuente de verdad es la API REST + SQLite (backend/). localStorage actúa
+ * como caché de arranque y como modo de contingencia si el servidor no está
+ * disponible; la sincronización se coordina en lib/persistence.js.
  */
 
 const PREFIX = 'aerohealth.v2.';
@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   logs: 'logs',
   riskHistory: 'riskHistory',
   suppressedVitals: 'vitals.suppressed',
+  crew: 'crew',
   sidebarCollapsed: 'ui.sidebarCollapsed',
 };
 

@@ -5,6 +5,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
-  }
+    open: true,
+    proxy: {
+      // El backend Node/SQLite escucha en 4000 (ver backend/src/config.js).
+      '/api': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true,
+      },
+    },
+  },
 });

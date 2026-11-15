@@ -7,7 +7,33 @@ import { Orbit } from 'lucide-react';
  * La navegación, las alertas y el estado operativo viven en el sidebar y en
  * los módulos, no en el topbar.
  */
-export default function Header({ user = { name: 'Elena Vance', role: 'Flight Surgeon', initials: 'EV' } }) {
+const CONNECTION_STATES = {
+  online: {
+    label: 'API · SQLite',
+    title: 'Persistencia remota activa: los registros se guardan en la base de datos.',
+    className: 'border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-200',
+    dot: 'bg-emerald-400 shadow-[0_0_8px_#34D399]',
+  },
+  connecting: {
+    label: 'Conectando…',
+    title: 'Estableciendo enlace con la API AeroHealth.',
+    className: 'border-cyan-400/25 bg-cyan-400/[0.06] text-cyan-200',
+    dot: 'animate-pulse bg-telemetry-cyan shadow-[0_0_8px_#22D3EE]',
+  },
+  offline: {
+    label: 'Modo local',
+    title: 'API no disponible. Los datos se guardan en localStorage y se reintentará la sincronización.',
+    className: 'border-amber-400/30 bg-amber-400/[0.07] text-amber-200',
+    dot: 'bg-amber-400 shadow-[0_0_8px_#FBBF24]',
+  },
+};
+
+export default function Header({
+  user = { name: 'Elena Vance', role: 'Flight Surgeon', initials: 'EV' },
+  backendStatus = 'connecting',
+}) {
+  const connection = CONNECTION_STATES[backendStatus] || CONNECTION_STATES.connecting;
+
   return (
     <header className="sticky top-0 z-30 border-b border-space-800/80 bg-space-950/85 backdrop-blur-xl">
       <div className="mx-auto flex h-[60px] w-full max-w-[1680px] items-center justify-between gap-4 px-4 sm:px-6">
@@ -33,8 +59,15 @@ export default function Header({ user = { name: 'Elena Vance', role: 'Flight Sur
           </div>
         </div>
 
-        {/* Usuario autenticado */}
+        {/* Estado de persistencia + usuario autenticado */}
         <div className="flex shrink-0 items-center gap-2.5">
+          <span
+            className={`mono hidden items-center gap-1.5 rounded-md border px-2 py-1 text-[8px] font-bold uppercase tracking-[0.14em] sm:flex ${connection.className}`}
+            title={connection.title}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${connection.dot}`} />
+            {connection.label}
+          </span>
           <span className="hidden text-right sm:block">
             <span className="mono block text-[8.5px] uppercase tracking-[0.14em] text-slate-500">Sesión activa</span>
             <span className="block font-heading text-[12px] font-bold leading-tight text-slate-200">{user.name}</span>

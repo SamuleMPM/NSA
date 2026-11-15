@@ -6,6 +6,12 @@ dist-ssr/
 npm-debug.log
 yarn-error.log
 
+# Base de datos local de AeroHealth (SQLite)
+backend/data/
+*.db
+*.db-wal
+*.db-shm
+
 # Python
 __pycache__/
 *.pyc

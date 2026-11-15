@@ -1,9 +1,9 @@
-# Frontend — NASA AeroHealth
+# Frontend · NASA AeroHealth
 
 Consola de monitorización biomédica espacial construida con **React 18**, **Vite 6**,
 **Tailwind CSS 3**, **Lucide** y **Three.js**. Interfaz de Flight Surgeon para una
 misión de tránsito interplanetario, con datos **simulados** o introducidos
-manualmente y persistencia local.
+manualmente y persistencia real en la API + SQLite del repositorio.
 
 > Los valores del motor de simulación no representan telemetría real de la NASA.
 > El modelo RIDGE es una ayuda a la decisión, no un límite clínico oficial.
@@ -71,16 +71,44 @@ Implementación de los cinco riesgos del NASA HRP:
 - **E** Entornos cerrados y hostiles.
 
 Detalles de fórmulas, bandas, fuentes y limitaciones:
-[`docs/RIDGE_IMPLEMENTATION.md`](../docs/RIDGE_IMPLEMENTATION.md).
+[`src/lib/risks.js`](src/lib/risks.js).
 
 ---
 
 ## Persistencia
 
-No hay backend funcional (`backend/README.md` es un placeholder). La consola usa
-`localStorage` a través de `src/lib/storage.js`, con espacio de nombres
-`aerohealth.v2.`. Se guardan registros, alertas, logs, historial de riesgos y
-supresiones de constantes vitales. La abstracción permite sustituirla por una API.
+La fuente de verdad es la **API REST + SQLite** de `backend/` (ver
+[`backend/README.md`](../backend/README.md)). El frontend:
+
+1. Arranca al instante con la caché de `localStorage` (`aerohealth.v2.`).
+2. Se hidrata con `GET /api/bootstrap`.
+3. Migra automáticamente datos antiguos de `localStorage` si la base está vacía.
+4. Sincroniza cada mutación con `PUT /api/records`, `/api/alerts`, `/api/logs`,
+   `/api/risk-history` y `/api/suppressed-vitals` (debounce de 250 ms).
+5. Si la API no responde, muestra **Modo local**, conserva `localStorage` y
+   reintenta al volver la conexión o en la siguiente escritura.
+
+El Header indica el estado de persistencia: **API · SQLite**, **Conectando…** o
+**Modo local**.
+
+### Desarrollo con API
+
+```bash
+# Terminal 1
+cd backend
+npm start                 # http://127.0.0.1:4000
+
+# Terminal 2
+cd frontend
+npm run dev               # http://localhost:3000 (proxy /api → :4000)
+```
+
+`vite.config.js` reenvía `/api` al backend. Para apuntar a otro servidor:
+
+```bash
+# frontend/.env.local
+VITE_API_URL=https://mi-api.example.com/api
+```
 
 ---
 
@@ -88,7 +116,7 @@ supresiones de constantes vitales. La abstracción permite sustituirla por una A
 
 ```
 frontend/src/
-├── App.jsx                     # Orquestación, simulación en vivo, alertas y persistencia
+├── App.jsx                     # Orquestación, simulación en vivo, alertas y sincronización
 ├── modules/
 │   ├── Dashboard.jsx           # Shell de pestañas
 │   ├── DashboardOverview.jsx
@@ -100,13 +128,15 @@ frontend/src/
 │   └── MedicalHandbook.jsx
 ├── components/                 # Header, Sidebar, tarjetas, ECG, 3D, matriz de riesgo…
 └── lib/
+    ├── api.js                  # Cliente HTTP de la API REST
+    ├── persistence.js          # Hidratación, migración y sincronización
     ├── clinical.js             # Rangos y recomendaciones clínicas
     ├── risks.js                # Modelo RIDGE
     ├── records.js              # Esquemas y validación de las seis categorías
     ├── alerts.js               # Motor de alertas
     ├── simulation.js           # Escenarios y telemetría sintética
     ├── environments.js         # Entornos de misión
-    ├── storage.js              # Persistencia local
+    ├── storage.js              # Caché local de arranque
     └── format.js               # Utilidades de formato
 ```
 
@@ -121,4 +151,5 @@ npm run build     # genera dist/
 npm run preview   # sirve la compilación de producción
 ```
 
-Requisitos: Node.js 18+ y npm. No se han añadido dependencias nuevas.
+Requisitos: Node.js 18+ para el frontend. Para servir la API se recomienda
+Node.js 24.

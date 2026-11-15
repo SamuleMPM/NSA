@@ -1,0 +1,17 @@
+{
+  "name": "aerohealth-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API REST y persistencia SQLite de la consola AeroHealth (NASA Space Apps Challenge).",
+  "engines": {
+    "node": ">=23.4.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "db:seed": "node scripts/seed.js",
+    "db:reset": "node scripts/reset.js"
+  }
+}
