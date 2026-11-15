@@ -17,6 +17,15 @@ import {
   ChevronRight,
   Orbit,
   Cpu,
+  Compass,
+  ClipboardCheck,
+  Trophy,
+  BookOpen,
+  Sparkles,
+  Eye,
+  Apple,
+  Brain,
+  Bone,
 } from 'lucide-react';
 import StatusPill from '../components/ui/StatusPill';
 import RadialGauge from '../components/ui/RadialGauge';
@@ -98,6 +107,10 @@ export default function GeneralDashboard({
   currentScenario = 'microgravity',
   setActiveModule,
   onResetNominal,
+  currentEnvironmentInfo = { name: 'Tránsito a Marte', gravityText: '0.00 G' },
+  latestSample = {},
+  bioCredits = 1420,
+  healthStreak = 12,
 }) {
   let totalScore = 100;
   activeAlerts.forEach((a) => {
@@ -110,6 +123,7 @@ export default function GeneralDashboard({
   const crewEntries = Object.entries(astronauts);
   const evaCount = crewEntries.filter(([, ast]) => ast.activity === 'EVA').length;
   const alertingCrew = Object.values(latestVitalsByAstronaut).filter((v) => v.isAlert).length;
+  const currentAst = astronauts[selectedAstronautId] || {};
 
   const eclssItems = [
     {
@@ -173,22 +187,20 @@ export default function GeneralDashboard({
         <div className="relative grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="pill pill-cyan">MOD-01</span>
-              <span className="eyebrow">FLIGHT SURGEON CONSOLE</span>
+              <span className="pill pill-cyan">NASA-HRP</span>
+              <span className="eyebrow">ASTRONAUT HEALTH MONITORING SYSTEM</span>
               <span className="h-1 w-1 rounded-full bg-slate-700" />
               <span className="mono flex items-center gap-1.5 text-[9px] font-semibold text-emerald-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_7px_#34D399]" />
-                TELEMETRÍA EN VIVO
+                TELEMETRÍA MULTICANAL EN VIVO
               </span>
             </div>
 
             <h1 className="mt-2 font-heading text-[24px] font-extrabold leading-[1.08] tracking-tight text-white sm:text-[30px]">
-              Estado biomédico de la tripulación
+              Monitorización de Salud para Vuelos de Larga Duración
             </h1>
             <p className="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-400">
-              Monitoreo fisiológico holístico en tiempo real de los {crewEntries.length} astronautas de la misión{' '}
-              <span className="mono font-semibold text-cyan-300">{missionId.toUpperCase()}</span>. Flujo continuo
-              generado mediante modelos matemáticos sintéticos.
+              Plataforma autónoma para que la tripulación evalúe indicadores clave de salud (presión arterial, glucosa, sueño, estado mental, ultrasonido SANS) y ejecute contramedidas frente a los cinco riesgos de la NASA (RIDGE).
             </p>
 
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
@@ -210,24 +222,45 @@ export default function GeneralDashboard({
                 </span>
               </div>
               <div className="panel-inset hidden items-center gap-2 px-2.5 py-1.5 sm:flex">
-                <Radio className="h-3.5 w-3.5 text-telemetry-green" aria-hidden="true" />
-                <span className="mono text-[9px] text-slate-500">ENLACE</span>
-                <span className="mono text-[11px] font-bold text-emerald-300">100%</span>
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+                <span className="mono text-[9px] text-slate-500">BIO-CRÉDITOS</span>
+                <span className="mono text-[11px] font-bold text-amber-300">{bioCredits} pts</span>
               </div>
             </div>
 
+            {/* Accesos rápidos a los nuevos módulos de la NASA */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button type="button" onClick={() => setActiveModule('telemetry')} className="btn btn-primary">
-                <Activity className="h-3.5 w-3.5" />
-                Abrir telemetría
+              <button
+                type="button"
+                onClick={() => setActiveModule('bodymap')}
+                className="btn btn-primary"
+              >
+                <Compass className="h-3.5 w-3.5" />
+                Astronauta 3D & Chequeo Corporal
               </button>
-              <button type="button" onClick={() => setActiveModule('simulator')} className="btn">
-                <Sliders className="h-3.5 w-3.5 text-telemetry-cyan" />
-                Simulador
+              <button
+                type="button"
+                onClick={() => setActiveModule('self_assessment')}
+                className="btn"
+              >
+                <ClipboardCheck className="h-3.5 w-3.5 text-telemetry-cyan" />
+                Autoevaluación & Ecógrafo
               </button>
-              <button type="button" onClick={() => setActiveModule('alerts')} className="btn">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
-                Protocolos
+              <button
+                type="button"
+                onClick={() => setActiveModule('gamification')}
+                className="btn"
+              >
+                <Trophy className="h-3.5 w-3.5 text-amber-400" />
+                Rutinas & Gamificación
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModule('handbook')}
+                className="btn"
+              >
+                <BookOpen className="h-3.5 w-3.5 text-emerald-300" />
+                Manual 5 Riesgos NASA
               </button>
             </div>
           </div>
@@ -247,7 +280,7 @@ export default function GeneralDashboard({
                 </div>
                 <p className="mono mt-1.5 text-[9px] leading-relaxed text-slate-500">
                   {activeAlerts.length === 0
-                    ? 'SIN ANOMALÍAS ACTIVAS'
+                    ? 'ESTADO NOMINAL'
                     : `${activeAlerts.length} ANOMALÍA(S) EN CURSO`}
                 </p>
                 <div className="mt-2 flex items-center gap-1.5">
@@ -272,10 +305,120 @@ export default function GeneralDashboard({
                 <span className="mono mt-0.5 block text-[8px] uppercase tracking-wider text-slate-600">EN EVA</span>
               </div>
               <div className="px-2 text-center">
-                <span className="value-sm block text-emerald-300">03</span>
-                <span className="mono mt-0.5 block text-[8px] uppercase tracking-wider text-slate-600">SENSORES</span>
+                <span className="value-sm block text-emerald-300">{healthStreak}d</span>
+                <span className="mono mt-0.5 block text-[8px] uppercase tracking-wider text-slate-600">RACHA SALUD</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tarjeta de Indicadores Clave del Astronauta Seleccionado (Presión, Glucosa, Sueño, Estrés, SANS, Hueso) */}
+      <section className="panel p-4 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-space-700/70 pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400/25 bg-cyan-400/[0.06] text-telemetry-cyan">
+              <Activity className="h-3.5 w-3.5" />
+            </span>
+            <div>
+              <span className="eyebrow block">INDICADORES DE SALUD CLAVE (RETO NASA)</span>
+              <h3 className="font-heading text-[13px] font-bold text-slate-100">
+                Foco Individual: {currentAst.name} ({currentAst.role})
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveModule('self_assessment')}
+              className="btn btn-ghost !min-h-0 !px-2.5 !py-1 text-[11px]"
+            >
+              <ClipboardCheck className="h-3.5 w-3.5 text-cyan-300" />
+              <span>Registrar Autoevaluación</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveModule('bodymap')}
+              className="btn btn-ghost !min-h-0 !px-2.5 !py-1 text-[11px]"
+            >
+              <Compass className="h-3.5 w-3.5 text-telemetry-cyan" />
+              <span>Ver Órganos en 3D</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Presión Arterial */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Heart className="h-3 w-3 text-rose-400" />
+              Presión Arterial
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.systolic_bp || 118}/{latestSample.diastolic_bp || 76} <span className="text-[9px] text-slate-500">mmHg</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">ÓPTIMA</span>
+          </div>
+
+          {/* Glucosa en Sangre */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Apple className="h-3 w-3 text-amber-400" />
+              Glucosa Capilar
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.glucose || 92} <span className="text-[9px] text-slate-500">mg/dL</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">NOMINAL (70-110)</span>
+          </div>
+
+          {/* Horas de Sueño */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Brain className="h-3 w-3 text-purple-400" />
+              Sueño / 24h
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.sleep_hours || 7.8} <span className="text-[9px] text-slate-500">horas</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">FASE REM ESTABLE</span>
+          </div>
+
+          {/* Estrés y Salud Mental */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Brain className="h-3 w-3 text-cyan-400" />
+              Estrés Mental
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.stress_level || 18} <span className="text-[9px] text-slate-500">%</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">ENFOCADO</span>
+          </div>
+
+          {/* Vaina Nervio Óptico SANS */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Eye className="h-3 w-3 text-cyan-400" />
+              ONSD (SANS)
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.onsd_mm || 4.9} <span className="text-[9px] text-slate-500">mm</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">SIN PAPILOMEDEMA</span>
+          </div>
+
+          {/* Pérdida Ósea Mensual */}
+          <div className="panel-inset p-2.5">
+            <span className="mono flex items-center gap-1.5 text-[8.5px] uppercase tracking-wider text-slate-400">
+              <Bone className="h-3 w-3 text-emerald-400" />
+              Pérdida Ósea
+            </span>
+            <div className="mt-1 font-mono text-sm font-bold text-white">
+              {latestSample.bone_loss_monthly || 0.28} <span className="text-[9px] text-slate-500">%/mes</span>
+            </div>
+            <span className="font-mono text-[8px] text-emerald-400 block mt-0.5">ARED 120 MIN OK</span>
           </div>
         </div>
       </section>
@@ -293,7 +436,7 @@ export default function GeneralDashboard({
             </div>
           </div>
           <span className="mono hidden text-[9px] text-slate-600 sm:block">
-            SELECCIONA UN ASTRONAUTA PARA ABRIR MOD-02
+            SELECCIONA UN ASTRONAUTA PARA ENFOCAR TELEMETRÍA Y CONTRAMEDIDAS
           </span>
         </div>
 
@@ -544,7 +687,7 @@ export default function GeneralDashboard({
                 </span>
               )}
               <button type="button" onClick={() => setActiveModule('alerts')} className="btn sm:flex-1">
-                Abrir MOD-04
+                Abrir MOD-08
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />
               </button>
             </div>

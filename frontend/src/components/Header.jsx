@@ -13,6 +13,9 @@ import {
   Radio,
   ChevronRight,
   Orbit,
+  Sparkles,
+  Flame,
+  Compass,
 } from 'lucide-react';
 
 export default function Header({
@@ -26,6 +29,9 @@ export default function Header({
   setSoundEnabled,
   mobileMenuOpen = false,
   setMobileMenuOpen,
+  environmentInfo = { name: 'Tránsito a Marte', gravityText: '0.00 G' },
+  bioCredits = 1420,
+  healthStreak = 12,
 }) {
   const [metTime, setMetTime] = useState({ days: 142, hours: 8, minutes: 24, seconds: 19 });
   const [utcTime, setUtcTime] = useState('');
@@ -96,8 +102,34 @@ export default function Header({
           </div>
         </div>
 
-        {/* Flight clocks */}
+        {/* Flight clocks & Environment badge */}
         <div className="hidden items-center gap-1.5 xl:flex">
+          {/* Badge del Entorno Espacial */}
+          <div className="flex items-center gap-2 rounded-md border border-cyan-500/25 bg-cyan-500/[0.06] px-2.5 py-1.5">
+            <Compass className="h-3.5 w-3.5 text-telemetry-cyan" aria-hidden="true" />
+            <div>
+              <span className="mono block text-[8px] uppercase tracking-[0.14em] text-slate-400">
+                ENTORNO ESPACIAL
+              </span>
+              <span className="mono block text-[11px] font-bold tracking-wider text-cyan-200">
+                {environmentInfo.name?.split('(')[0] || 'Tránsito a Marte'} · {environmentInfo.gravityText?.split(' ')[0] || '0.00G'}
+              </span>
+            </div>
+          </div>
+
+          {/* Gamificación en Header */}
+          <div className="flex items-center gap-2 rounded-md border border-amber-400/25 bg-amber-400/[0.06] px-2.5 py-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+            <div>
+              <span className="mono block text-[8px] uppercase tracking-[0.14em] text-slate-400">
+                AEROQUEST BIO-CRÉDITOS
+              </span>
+              <span className="mono flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-amber-300">
+                {bioCredits} pts · <Flame className="h-3 w-3 text-rose-400" /> {healthStreak}d racha
+              </span>
+            </div>
+          </div>
+
           <div className="flex items-center gap-2 rounded-md border border-space-700/70 bg-space-900/60 px-2.5 py-1.5">
             <Clock className="h-3.5 w-3.5 text-telemetry-cyan" aria-hidden="true" />
             <div>
@@ -110,26 +142,14 @@ export default function Header({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-md border border-space-700/70 bg-space-900/60 px-2.5 py-1.5">
-            <Orbit className="h-3.5 w-3.5 text-telemetry-blue" aria-hidden="true" />
-            <div>
-              <span className="mono block text-[8px] uppercase tracking-[0.14em] text-slate-500">
-                UTC / GROUND
-              </span>
-              <span className="mono block text-[11px] font-bold tracking-wider text-slate-200">
-                {utcTime || '--:--:--'}
-              </span>
-            </div>
-          </div>
-
           <div className="flex items-center gap-2 rounded-md border border-emerald-400/20 bg-emerald-400/[0.05] px-2.5 py-1.5">
             <Radio className="h-3.5 w-3.5 text-telemetry-green" aria-hidden="true" />
             <div>
               <span className="mono block text-[8px] uppercase tracking-[0.14em] text-slate-500">
-                DSN GOLDSTONE 70M
+                LATENCIA DE TIERRA
               </span>
               <span className="mono block text-[11px] font-bold tracking-wider text-telemetry-green">
-                LINK NOMINAL · 324ms
+                14.5 MIN (AUTONOMÍA REQUERIDA)
               </span>
             </div>
           </div>
@@ -208,7 +228,7 @@ export default function Header({
             T+{metTime.days}d {f2(metTime.hours)}:{f2(metTime.minutes)}:{f2(metTime.seconds)}
           </span>
           <span className="h-2.5 w-px bg-space-700" />
-          <span className="mono text-[9px] text-slate-500">{utcTime || '--:--:--'} UTC</span>
+          <span className="mono text-[9px] text-amber-300">⭐ {bioCredits} pts</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={`h-1.5 w-1.5 rounded-full ${hasAlert ? 'bg-telemetry-crimson' : 'bg-telemetry-green'}`} />

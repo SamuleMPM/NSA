@@ -1,7 +1,11 @@
 import React from 'react';
 import {
   LayoutDashboard,
+  Compass,
+  ClipboardCheck,
   Activity,
+  Trophy,
+  BookOpen,
   SlidersHorizontal,
   ShieldAlert,
   Database,
@@ -23,29 +27,57 @@ const MODULES = [
     icon: LayoutDashboard,
   },
   {
-    id: 'telemetry',
+    id: 'bodymap',
     index: '02',
+    name: 'Astronauta 3D & Chequeo',
+    desc: 'Modelo 3D realista y SANS',
+    icon: Compass,
+  },
+  {
+    id: 'self_assessment',
+    index: '03',
+    name: 'Autoevaluación & Datos',
+    desc: 'PA, glucosa, sueño y ecógrafo',
+    icon: ClipboardCheck,
+  },
+  {
+    id: 'telemetry',
+    index: '04',
     name: 'Telemetría y ECG',
     desc: 'Signos vitales y Lead II',
     icon: Activity,
   },
   {
+    id: 'gamification',
+    index: '05',
+    name: 'Rutinas y Gamificación',
+    desc: 'AeroQuest, ARED y medallas',
+    icon: Trophy,
+  },
+  {
+    id: 'handbook',
+    index: '06',
+    name: 'Manual Médico HRP',
+    desc: '5 Riesgos NASA y guías',
+    icon: BookOpen,
+  },
+  {
     id: 'simulator',
-    index: '03',
-    name: 'Simulador de Misión',
-    desc: 'Escenarios fisiológicos',
+    index: '07',
+    name: 'Simulador y Entornos',
+    desc: 'Escenarios y multi-entorno',
     icon: SlidersHorizontal,
   },
   {
     id: 'alerts',
-    index: '04',
+    index: '08',
     name: 'Alertas y Soluciones',
     desc: 'Contramedidas clínicas',
     icon: ShieldAlert,
   },
   {
     id: 'integration',
-    index: '05',
+    index: '09',
     name: 'Integración y Datos',
     desc: 'Contrato JSON y auditoría',
     icon: Database,
@@ -120,7 +152,7 @@ export default function Sidebar({
                 <div className="font-heading text-[15px] font-extrabold tracking-wide text-white">
                   AEROHEALTH
                 </div>
-                <div className="eyebrow mt-0.5">FLIGHT SURGEON CONSOLE</div>
+                <div className="eyebrow mt-0.5">NASA HRP PLATFORM</div>
               </div>
             </div>
 
@@ -145,7 +177,7 @@ export default function Sidebar({
             </div>
             <div className="text-right">
               <span className="eyebrow block">PHASE</span>
-              <span className="mono text-[11px] font-bold text-telemetry-cyan">CRUISE</span>
+              <span className="mono text-[11px] font-bold text-telemetry-cyan">TRANSIT</span>
             </div>
             <span className="h-7 w-px bg-space-700" />
             <div className="text-right">
@@ -161,7 +193,7 @@ export default function Sidebar({
         <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-3">
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="eyebrow">CONSOLAS / MOD</span>
-            <span className="mono text-[9px] text-slate-600">05</span>
+            <span className="mono text-[9px] text-slate-600">09</span>
           </div>
 
           <div className="space-y-1">
@@ -309,7 +341,7 @@ export default function Sidebar({
             <div className="flex items-center justify-between">
               <span className="mono flex items-center gap-1.5 text-[9px] text-slate-500">
                 <Radio className="h-3 w-3 text-telemetry-green" aria-hidden="true" />
-                DSN LINK
+                DSN LINK (MARTE)
               </span>
               <span className="mono text-[9px] font-bold text-telemetry-green">100%</span>
             </div>
@@ -317,9 +349,9 @@ export default function Sidebar({
               <div className="rail-fill rail-green" style={{ width: '100%' }} />
             </div>
             <div className="mt-1.5 flex items-center justify-between font-mono text-[8.5px] text-slate-600">
-              <span>GOLDSTONE 70M</span>
+              <span>LATENCIA: 14.5 MIN</span>
               <span className="flex items-center gap-1">
-                PING 324ms
+                AUTONOMÍA
                 <ChevronRight className="h-2.5 w-2.5" aria-hidden="true" />
               </span>
             </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import MissionControls from '../components/MissionControls';
 import MissionLogs from '../components/MissionLogs';
+import EnvironmentSelector from '../components/EnvironmentSelector';
 import ModuleHeader from '../components/ui/ModuleHeader';
 import StatusPill from '../components/ui/StatusPill';
 import {
@@ -11,11 +12,14 @@ import {
   Gauge,
   Orbit,
   Radio,
+  Compass,
 } from 'lucide-react';
 
 export default function MissionSimulator({
   currentScenario,
   handleSelectScenario,
+  currentEnvironment = 'transit',
+  handleSelectEnvironment,
   isAutoSimulating,
   setIsAutoSimulating,
   handleTick,
@@ -31,35 +35,35 @@ export default function MissionSimulator({
   const architecture = [
     {
       icon: Activity,
-      title: 'Modelo estocástico',
-      desc: 'Distribuciones acopladas al gasto metabólico (Watts) y al estrés adinámico.',
+      title: 'Modelo estocástico HRP',
+      desc: 'Distribuciones acopladas al gasto metabólico (Watts), estrés adinámico y resistencia a insulina.',
     },
     {
       icon: Gauge,
-      title: 'Acoplamiento de traje',
-      desc: 'Presión de escafandra (29.6 kPa) frente a saturación capilar (SpO₂).',
+      title: 'Acoplamiento de traje y hábitat',
+      desc: 'Presión de escafandra (29.6 kPa) frente a saturación capilar (SpO₂) y gradientes de CO₂.',
     },
     {
       icon: ShieldCheck,
-      title: 'Verificación de contrato',
-      desc: 'Telemetría 100% sintética para pruebas de software y Space Apps Challenge.',
+      title: 'Verificación de contrato NASA',
+      desc: 'Telemetría 100% sintética para pruebas de software conforme al reto NASA Space Apps Challenge.',
     },
   ];
 
   return (
     <div className="space-y-4">
       <ModuleHeader
-        code="MOD-03"
+        code="MOD-07"
         kicker="SIMULATION ENGINE / SYNTHETIC DATA GENERATOR"
-        title="Control de simulación y estados fisiológicos"
-        description="Inyección de escenarios fisiológicos, anomalías críticas y telemetría ambiental ECLSS para validar protocolos de respuesta médica."
+        title="Simulador de Misión y Entornos Espaciales"
+        description="Inyección de escenarios fisiológicos, selección de entornos (tránsito, órbita, rover, base planetaria) y telemetría ambiental ECLSS."
         icon={SlidersHorizontal}
         status={
           <>
             <StatusPill status={isAutoSimulating ? 'nominal' : 'warning'}>
-              {isAutoSimulating ? 'STREAMING' : 'FLUJO PAUSADO'}
+              {isAutoSimulating ? 'STREAMING V2' : 'FLUJO PAUSADO'}
             </StatusPill>
-            <span className="pill pill-violet">SIM-V1</span>
+            <span className="pill pill-violet">NASA-HRP</span>
           </>
         }
         actions={
@@ -77,6 +81,13 @@ export default function MissionSimulator({
         }
       />
 
+      {/* Selector de Entornos Espaciales (Tránsito, Estación, Rover, Base) */}
+      <EnvironmentSelector
+        currentEnvironmentId={currentEnvironment}
+        onSelectEnvironment={handleSelectEnvironment}
+      />
+
+      {/* Controles de Escenarios y Logs */}
       <div className="grid grid-cols-1 gap-3.5 xl:grid-cols-12">
         <div className="xl:col-span-8">
           <MissionControls
@@ -104,7 +115,7 @@ export default function MissionSimulator({
             </span>
             <div>
               <span className="eyebrow block">ENGINE ARCHITECTURE</span>
-              <h3 className="font-heading text-[13px] font-bold text-slate-100">Generación sintética y contratos</h3>
+              <h3 className="font-heading text-[13px] font-bold text-slate-100">Generación sintética y contratos biomédicos</h3>
             </div>
           </div>
           <span className="pill">ARCHITECTURE.MD</span>
@@ -131,11 +142,11 @@ export default function MissionSimulator({
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-space-700/60 px-4 py-2.5">
           <span className="mono flex items-center gap-1.5 text-[9px] text-slate-600">
             <Radio className="h-3 w-3 text-telemetry-green" aria-hidden="true" />
-            SALIDA COMPATIBLE CON EL CONTRATO JSON DE TELEMETRÍA
+            SALIDA COMPATIBLE CON EL CONTRATO JSON DE TELEMETRÍA (NASA SPACE APPS)
           </span>
           <span className="mono flex items-center gap-1.5 text-[9px] text-slate-600">
             <Orbit className="h-3 w-3 text-telemetry-blue" aria-hidden="true" />
-            ORION-01 · SIMULACIÓN ORBITAL
+            ORION-01 · SIMULACIÓN MULTI-ENTORNO ACTIVA
           </span>
         </div>
       </section>

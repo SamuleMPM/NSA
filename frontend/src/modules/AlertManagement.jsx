@@ -15,6 +15,10 @@ import {
   ListChecks,
   Users,
   ChevronRight,
+  Gauge,
+  Apple,
+  Eye,
+  Brain,
 } from 'lucide-react';
 import ModuleHeader from '../components/ui/ModuleHeader';
 import StatusPill from '../components/ui/StatusPill';
@@ -184,6 +188,130 @@ export default function AlertManagement({
         },
       ],
     },
+    {
+      id: 'hypertension_fluid_shift',
+      title: 'Hipertensión Espacial / Desplazamiento Cefálico de Fluidos',
+      variable: 'Presión Arterial Sistólica (PA)',
+      threshold: '> 140 mmHg',
+      severity: 'CRITICAL',
+      icon: Gauge,
+      color: '#F472B6',
+      causes: [
+        'Redistribución de 1.5 a 2L de sangre hacia el tórax y cabeza en microgravedad',
+        'Vasoconstricción periférica refleja por estrés adrenérgico',
+        'Pérdida transitoria de tono barorreceptor',
+      ],
+      solutions: [
+        {
+          step: 1,
+          action: 'Conectar traje de presión negativa en miembros inferiores (Chibis / LBNP) a -35 mmHg por 45 minutos.',
+          detail: 'Redirige el volumen sanguíneo hacia las piernas descomprimiendo la circulación craneal.',
+        },
+        {
+          step: 2,
+          action: 'Reducir consumo de sodio en raciones espaciales a <1.8 g/día y asegurar hidratación isotónica.',
+          detail: 'Previene la hipervolemia central y el edema facial.',
+        },
+        {
+          step: 3,
+          action: 'Administrar vasodilatador oral prescrito si la sistólica se mantiene >150 mmHg tras 2 horas.',
+          detail: 'Registrar evolución en el reporte médico diferido a Houston.',
+        },
+      ],
+    },
+    {
+      id: 'sans_ocular_edema',
+      title: 'Edema de Vaina del Nervio Óptico (SANS Grado II-III)',
+      variable: 'Ultrasonido ONSD',
+      threshold: '> 5.8 mm',
+      severity: 'CRITICAL',
+      icon: Eye,
+      color: '#22D3EE',
+      causes: [
+        'Elevación de presión de líquido cefalorraquídeo retroocular por ausencia de gravedad',
+        'Congestión venosa yugular continua en microgravedad prolongada',
+        'Aplanamiento mecánico del polo posterior retiniano',
+      ],
+      solutions: [
+        {
+          step: 1,
+          action: 'Colocar traje de presión negativa en extremidades inferiores (LBNP Chibis).',
+          detail: 'Disminuye la presión venosa central e intracraneal inmediatamente.',
+        },
+        {
+          step: 2,
+          action: 'Examen oftalmológico completo con fondo de ojo y retinógrafo portátil.',
+          detail: 'Cuantificar grado de edema papilar de Frisen.',
+        },
+        {
+          step: 3,
+          action: 'Uso de gafas de ajuste de refracción variable para compensar hipermetropía inducida.',
+          detail: 'Ajuste óptico inmediato para lectura de consolas.',
+        },
+      ],
+    },
+    {
+      id: 'glucose_dysregulation',
+      title: 'Desregulación Metabólica y Glucemia Crítica',
+      variable: 'Glucosa Capilar (GLUC)',
+      threshold: '> 140 o < 65 mg/dL',
+      severity: 'CRITICAL',
+      icon: Apple,
+      color: '#F59E0B',
+      causes: [
+        'Resistencia muscular transitoria a insulina inducida por hipoquinesia en 0g',
+        'Estrés metabólico y liberación compensatoria de cortisol',
+        'Retardo en la motilidad gástrica y absorción de nutrientes',
+      ],
+      solutions: [
+        {
+          step: 1,
+          action: 'En caso de hipoglucemia (<65 mg/dL): ingesta inmediata de 15g de dextrosa oral.',
+          detail: 'Restaura glucemia en 10 minutos previniendo síncope o confusión.',
+        },
+        {
+          step: 2,
+          action: 'En caso de hiperglucemia (>140 mg/dL): sesión de 30 min en cicloergómetro a 80W.',
+          detail: 'Estimula la captación de glucosa por transportadores GLUT4 no dependientes de insulina.',
+        },
+        {
+          step: 3,
+          action: 'Reajustar el perfil nutricional diario en el menú espacial.',
+          detail: 'Aumentar fibra hidrosoluble y fraccionar las tomas calóricas.',
+        },
+      ],
+    },
+    {
+      id: 'confinement_stress_syndrome',
+      title: 'Estrés de Confinamiento y Desincronización Circadiana',
+      variable: 'Estrés Subjetivo & Sueño',
+      threshold: '> 65% estrés o < 5.5h sueño',
+      severity: 'WARNING',
+      icon: Brain,
+      color: '#A78BFA',
+      causes: [
+        'Aislamiento prolongado en volumen habitable cerrado sin contacto presencial con Tierra',
+        'Desincronización por 16 puestas de sol/amaneceres al día en órbita',
+        'Sobrecarga de tareas de mantenimiento y operaciones',
+      ],
+      solutions: [
+        {
+          step: 1,
+          action: 'Activar protocolo de luz azul matutina (480nm) y luz ámbar nocturna en camarotes.',
+          detail: 'Restaura la secreción de melatonina y la fase circadiana.',
+        },
+        {
+          step: 2,
+          action: 'Sesión de relajación y mindfulness de 20 min en realidad virtual inmersiva.',
+          detail: 'Visualización de entornos naturales terrestres para reducir cortisol salival.',
+        },
+        {
+          step: 3,
+          action: 'Redistribuir cronograma de tareas operativas para asegurar 8 horas en cama.',
+          detail: 'Evita la degradación del rendimiento cognitivo en maniobras críticas.',
+        },
+      ],
+    },
   ];
 
   const kpis = [
@@ -210,7 +338,7 @@ export default function AlertManagement({
     },
     {
       label: 'UMBRALES',
-      value: '4',
+      value: '8',
       note: 'Validados clínicamente',
       icon: ShieldCheck,
       color: '#34D399',
