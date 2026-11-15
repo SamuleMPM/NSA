@@ -1,68 +1,124 @@
-# Frontend - Centro de Telemetría Biomédica Aeroespacial
+# Frontend — NASA AeroHealth
 
-Interfaz moderna y de alta fidelidad desarrollada con **React.js 18**, **Tailwind CSS**, **Lucide Icons** y **Vite** para el **Equipo 3 (Frontend y UX)**.
+Consola de monitorización biomédica espacial construida con **React 18**, **Vite 6**,
+**Tailwind CSS 3**, **Lucide** y **Three.js**. Interfaz de Flight Surgeon para una
+misión de tránsito interplanetario, con datos **simulados** o introducidos
+manualmente y persistencia local.
 
----
-
-## 🛰️ Características Principales
-
-- **Dashboard de Telemetría en Tiempo Real:** 
-  - Tarjetas de constantes vitales con medidores visuales, deltas de cambio y estados (*Nominal*, *Advertencia*, *Alerta Crítica*).
-  - Reglas clínicas automáticas basadas en [docs/DATA_DICTIONARY.md](file:///c:/Users/raydl/Documents/Streamlit/NSA/docs/DATA_DICTIONARY.md).
-- **Osciloscopio / ECG en Vivo (Lead II):**
-  - Trazado dinámico en Canvas de la onda cardíaca P-Q-R-S-T a 25 mm/s y 10 mm/mV sincronizado con los latidos (BPM).
-  - Efecto de audio opcional (Web Audio API) con sonido de monitor médico conmutable.
-- **Tripulación Activa y Selector de Astronautas:**
-  - `ast_001`: Neil A. (Comandante de Misión — EVA)
-  - `ast_002`: Ellen O. (Especialista Biomédica — IVA)
-  - `ast_003`: Pedro D. (Ingeniero de Vuelo — REST)
-- **Motor de Simulación Fisiológica de Escenarios:**
-  - Microgravedad Estándar (Nominal)
-  - Paseo Espacial (EVA / Alta Carga Fisiológica)
-  - Alerta de Hipoxia (Despresurización Parcial)
-  - Estrés Térmico / Hipertermia
-  - Ciclo de Reposo / Sueño
-  - Inyector de anomalías de emergencia y botón de estabilización médica.
-- **Gráficos de Tendencias y Análisis Temporal:**
-  - Visualización vectorial SVG con curvas suavizadas, rangos de referencia y estadísticas (Mínimo, Promedio, Máximo).
-- **Terminal de Eventos y Logs:**
-  - Registro de auditoría cronológico con filtrado por severidad (`INFO`, `WARN`, `CRITICAL`).
-- **Contrato de Integración JSON:**
-  - Modal interactivo con copia al portapapeles y descarga de telemetría conforme a la especificación en [docs/ARCHITECTURE.md](file:///c:/Users/raydl/Documents/Streamlit/NSA/docs/ARCHITECTURE.md).
-- **Diccionario Médico Integrado:**
-  - Acceso inmediato a la tabla de variables, unidades y umbrales de alerta.
+> Los valores del motor de simulación no representan telemetría real de la NASA.
+> El modelo RIDGE es una ayuda a la decisión, no un límite clínico oficial.
 
 ---
 
-## 🛠️ Tecnologías
+## Módulos
 
-- **React 18** (JavaScript)
-- **Vite 6** (Bundler de alto rendimiento)
-- **Tailwind CSS 3** (Diseño aeroespacial oscuro y glassmorphism)
-- **Lucide React** (Iconografía técnica y médica)
-- **HTML5 Canvas & Web Audio API** (Osciloscopio y alertas sonoras)
+La navegación principal tiene tres módulos:
+
+1. **Dashboard** — cuatro pestañas:
+   - `Resumen`: KPIs, tripulación, constantes vitales, matriz RIDGE, alertas abiertas, entorno y estado de los registros.
+   - `Alertas`: detección automática, filtros por estado/severidad, atención, resolución y contramedidas.
+   - `Riesgos RIDGE`: los cinco riesgos HRP, indicadores, fórmulas, contramedidas e historial.
+   - `Inserción de datos`: seis categorías con validación, edición, borrado y exportación JSON.
+2. **Telemetría y ECG** — constantes vitales, ECG Lead II, panel del último ECG validado, astronauta 3D, tendencias y perfil biomédico.
+3. **Simulador y entornos** — nueve escenarios fisiológicos, cuatro entornos, telemetría ambiental sintética, evaluación RIDGE y guardado de corridas.
+
+La barra lateral se puede contraer/expandir en escritorio y se convierte en
+navegación inferior en móvil. El estado de contracción se conserva.
 
 ---
 
-## 🚀 Inicio Rápido
+## Inserción de datos
 
-### 1. Requisitos
-- **Node.js** v18+ y **npm** (o `npx`)
+Categorías disponibles:
 
-### 2. Instalación de dependencias
-Desde la carpeta `frontend/`:
+| Categoría | Contenido |
+| :--- | :--- |
+| Astronauta | Identificación, rol, actividad, demografía y contexto de misión. |
+| Signos vitales | HR, SpO₂, temperatura, frecuencia respiratoria, presión, glucosa, sueño y estrés. |
+| Telemetría | Fuente de señal, muestreo, HRV, calidad y ritmo observado. |
+| ECG | Ritmo, intervalos PR/QRS/QTc, segmento ST e interpretación. |
+| Entorno espacial | O₂, CO₂, presión, temperatura, humedad, calidad de aire, radiación y enlace. |
+| Simulación | Escenario, entorno, condiciones iniciales, variables RIDGE y resultado. |
+
+Cada registro conserva fecha, origen (`manual`, `simulated`, `automated`),
+validación y marcas de creación/actualización. Los registros se propagan a
+Dashboard, Telemetría, Simulador, Alertas y Riesgos.
+
+---
+
+## Alertas
+
+- Evaluación automática de HR, SpO₂, temperatura y frecuencia respiratoria.
+- Alertas de riesgo RIDGE y de ritmo ECG.
+- Severidades: informativa, advertencia, crítica y emergencia.
+- Ciclo de vida: activa → atendida → resuelta, con historial y recurrencias.
+- Cada alerta muestra parámetro, valor, rango de referencia, fecha, explicación y recomendaciones.
+- Una contramedida normaliza la simulación y suprime el registro manual que originó la alerta, incluso tras recargar.
+
+Rangos nominales, de advertencia y críticos: `docs/DATA_DICTIONARY.md`.
+Umbrales de emergencia: configurables, marcados como simulación.
+
+---
+
+## Riesgos RIDGE
+
+Implementación de los cinco riesgos del NASA HRP:
+
+- **R** Radiación espacial.
+- **I** Aislamiento y confinamiento.
+- **D** Distancia de la Tierra.
+- **G** Campos gravitatorios alterados.
+- **E** Entornos cerrados y hostiles.
+
+Detalles de fórmulas, bandas, fuentes y limitaciones:
+[`docs/RIDGE_IMPLEMENTATION.md`](../docs/RIDGE_IMPLEMENTATION.md).
+
+---
+
+## Persistencia
+
+No hay backend funcional (`backend/README.md` es un placeholder). La consola usa
+`localStorage` a través de `src/lib/storage.js`, con espacio de nombres
+`aerohealth.v2.`. Se guardan registros, alertas, logs, historial de riesgos y
+supresiones de constantes vitales. La abstracción permite sustituirla por una API.
+
+---
+
+## Estructura
+
+```
+frontend/src/
+├── App.jsx                     # Orquestación, simulación en vivo, alertas y persistencia
+├── modules/
+│   ├── Dashboard.jsx           # Shell de pestañas
+│   ├── DashboardOverview.jsx
+│   ├── AlertsPanel.jsx
+│   ├── RisksPanel.jsx
+│   ├── DataEntry.jsx
+│   ├── BiomedicalTelemetry.jsx
+│   ├── MissionSimulator.jsx
+│   └── MedicalHandbook.jsx
+├── components/                 # Header, Sidebar, tarjetas, ECG, 3D, matriz de riesgo…
+└── lib/
+    ├── clinical.js             # Rangos y recomendaciones clínicas
+    ├── risks.js                # Modelo RIDGE
+    ├── records.js              # Esquemas y validación de las seis categorías
+    ├── alerts.js               # Motor de alertas
+    ├── simulation.js           # Escenarios y telemetría sintética
+    ├── environments.js         # Entornos de misión
+    ├── storage.js              # Persistencia local
+    └── format.js               # Utilidades de formato
+```
+
+---
+
+## Desarrollo
+
 ```bash
 npm install
+npm run dev       # http://localhost:3000
+npm run build     # genera dist/
+npm run preview   # sirve la compilación de producción
 ```
 
-### 3. Ejecutar en modo desarrollo
-```bash
-npm run dev
-```
-La aplicación se abrirá automáticamente en tu navegador en `http://localhost:3000`.
-
-### 4. Compilar para producción
-```bash
-npm run build
-```
-Los archivos optimizados se generarán en la carpeta `frontend/dist/`.
+Requisitos: Node.js 18+ y npm. No se han añadido dependencias nuevas.

@@ -22,6 +22,7 @@ import {
   ChevronDown,
   Sparkles,
 } from 'lucide-react';
+import ModuleHeader from '../components/ui/ModuleHeader';
 
 const HAZARDS_DATA = [
   {
@@ -140,31 +141,16 @@ export default function MedicalHandbook() {
 
   return (
     <div className="space-y-5">
-      {/* Encabezado del Manual Médico */}
-      <div className="rounded-2xl border border-space-800 bg-space-900/90 p-5 shadow-xl backdrop-blur-md">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-space-800 pb-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 text-telemetry-cyan">
-              <BookOpen className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-heading text-lg font-bold text-white">
-                  Manual Médico de Vuelo Artemis y Guía de los 5 Riesgos (NASA HRP)
-                </h2>
-                <span className="rounded bg-cyan-400/20 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-300">
-                  CLEAR INSTRUCTIONS FOR ASTRONAUTS
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Instrucciones sencillas y directas sin jerga médica pesada para que la tripulación comprenda los riesgos espaciales, aprenda a medirse y actúe con autonomía.
-              </p>
-            </div>
-          </div>
-        </div>
+      <ModuleHeader
+        code="MOD-06"
+        kicker="CLEAR INSTRUCTIONS FOR ASTRONAUTS"
+        title="Manual Médico de Vuelo Artemis y Guía de los 5 Riesgos (NASA HRP)"
+        description="Instrucciones sencillas y directas sin jerga médica pesada para que la tripulación comprenda los riesgos espaciales, aprenda a medirse y actúe con autonomía."
+        icon={BookOpen}
+      />
 
-        {/* Pestañas de Navegación del Manual */}
-        <div className="mt-4 flex flex-wrap gap-2">
+      {/* Pestañas de Navegación del Manual */}
+      <div className="panel flex flex-wrap gap-2 px-4 py-3">
           <button
             type="button"
             onClick={() => setActiveTab('hazards')}
@@ -203,7 +189,6 @@ export default function MedicalHandbook() {
             <Clock className="h-4 w-4 text-cyan-400" />
             <span>3. Matriz de Decisión: Autonomía vs Tierra (14 min delay)</span>
           </button>
-        </div>
       </div>
 
       {/* Contenido según Pestaña */}

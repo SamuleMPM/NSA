@@ -666,20 +666,20 @@ export default function Astronaut3DViewer({
       <div ref={containerRef} className="h-full w-full cursor-grab active:cursor-grabbing" />
 
       {/* Barra de Controles Superiores del Visor 3D */}
-      <div className="absolute left-3.5 right-3.5 top-3.5 flex items-center justify-between pointer-events-none">
+      <div className="absolute left-3.5 right-3.5 top-3.5 flex flex-col items-start gap-2 pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
           <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-cyan-300 bg-space-950/80 px-2 py-0.5 rounded border border-cyan-500/30 backdrop-blur-md">
+          <span className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-cyan-300 bg-space-950/80 px-2 py-0.5 rounded border border-cyan-500/30 backdrop-blur-md">
             REAL-TIME 3D ASTRONAUT
           </span>
         </div>
 
         {/* Selector de Modos de Visión (Traje / Rayos X / Órganos) */}
-        <div className="flex items-center gap-1 rounded-xl border border-space-700 bg-space-900/90 p-1 backdrop-blur-md pointer-events-auto">
+        <div className="flex flex-wrap items-center gap-0.5 rounded-xl border border-space-700 bg-space-900/90 p-1 backdrop-blur-md pointer-events-auto">
           <button
             type="button"
             onClick={() => onChangeViewMode('suit')}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 py-1 text-[11px] font-semibold transition ${
               viewMode === 'suit'
                 ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(34,211,238,0.4)]'
                 : 'text-slate-400 hover:text-white'
@@ -691,7 +691,7 @@ export default function Astronaut3DViewer({
           <button
             type="button"
             onClick={() => onChangeViewMode('xray')}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 py-1 text-[11px] font-semibold transition ${
               viewMode === 'xray'
                 ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(34,211,238,0.4)]'
                 : 'text-slate-400 hover:text-white'
@@ -703,7 +703,7 @@ export default function Astronaut3DViewer({
           <button
             type="button"
             onClick={() => onChangeViewMode('organs')}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 py-1 text-[11px] font-semibold transition ${
               viewMode === 'organs'
                 ? 'bg-cyan-500 text-white shadow-[0_0_12px_rgba(34,211,238,0.4)]'
                 : 'text-slate-400 hover:text-white'
@@ -716,63 +716,56 @@ export default function Astronaut3DViewer({
       </div>
 
       {/* Indicador de Latido y Respiración en Tiempo Real en la Esquina */}
-      <div className="absolute left-3.5 bottom-3.5 flex flex-col gap-1.5 font-mono text-[11px] pointer-events-none">
-        <div className="flex items-center gap-2 rounded-lg bg-black/70 px-2.5 py-1 border border-space-800 backdrop-blur-md text-rose-300">
-          <Heart className="h-3.5 w-3.5 animate-pulse" />
-          <span>LATIDO 3D: {heartRate} bpm</span>
+      <div className="absolute left-3.5 bottom-3.5 flex flex-col gap-1 font-mono text-[10px] pointer-events-none">
+        <div className="flex items-center gap-1.5 rounded-lg bg-black/70 px-2 py-1 border border-space-800 backdrop-blur-md text-rose-300">
+          <Heart className="h-3 w-3 animate-pulse" />
+          <span>LATIDO {heartRate} bpm</span>
         </div>
-        <div className="flex items-center gap-2 rounded-lg bg-black/70 px-2.5 py-1 border border-space-800 backdrop-blur-md text-cyan-300">
-          <Wind className="h-3.5 w-3.5 animate-pulse" />
-          <span>RESPIRACIÓN 3D: {respiratoryRate} rpm</span>
+        <div className="flex items-center gap-1.5 rounded-lg bg-black/70 px-2 py-1 border border-space-800 backdrop-blur-md text-cyan-300">
+          <Wind className="h-3 w-3 animate-pulse" />
+          <span>RESP {respiratoryRate} rpm</span>
         </div>
       </div>
 
       {/* Controles Flotantes Inferiores (Girar, Zoom, Resetear) */}
-      <div className="absolute right-3.5 bottom-3.5 flex items-center gap-1.5 rounded-xl border border-space-700 bg-space-900/90 p-1.5 backdrop-blur-md">
+      <div className="absolute right-3.5 bottom-3.5 flex items-center gap-0.5 rounded-xl border border-space-700 bg-space-900/90 p-1 backdrop-blur-md">
         <button
           type="button"
           onClick={() => setIsRotating(!isRotating)}
           title={isRotating ? 'Pausar rotación automática' : 'Reanudar rotación'}
-          className={`rounded-lg p-1.5 transition ${
+          className={`rounded-lg p-1 transition ${
             isRotating ? 'text-cyan-300 bg-cyan-500/20' : 'text-slate-400 hover:text-white'
           }`}
         >
-          {isRotating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {isRotating ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
         </button>
 
         <button
           type="button"
           onClick={() => handleZoom(-0.5)}
           title="Acercar cámara"
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-space-800 hover:text-white transition"
+          className="rounded-lg p-1 text-slate-400 hover:bg-space-800 hover:text-white transition"
         >
-          <ZoomIn className="h-4 w-4" />
+          <ZoomIn className="h-3.5 w-3.5" />
         </button>
 
         <button
           type="button"
           onClick={() => handleZoom(0.5)}
           title="Alejar cámara"
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-space-800 hover:text-white transition"
+          className="rounded-lg p-1 text-slate-400 hover:bg-space-800 hover:text-white transition"
         >
-          <ZoomOut className="h-4 w-4" />
+          <ZoomOut className="h-3.5 w-3.5" />
         </button>
 
         <button
           type="button"
           onClick={handleResetView}
           title="Centrar vista frontal"
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-space-800 hover:text-white transition"
+          className="rounded-lg p-1 text-slate-400 hover:bg-space-800 hover:text-white transition"
         >
-          <RotateCcw className="h-4 w-4" />
+          <RotateCcw className="h-3.5 w-3.5" />
         </button>
-      </div>
-
-      {/* Pista interactiva de ayuda para el usuario */}
-      <div className="absolute top-14 left-1/2 -translate-x-1/2 pointer-events-none text-center">
-        <span className="font-mono text-[10px] text-slate-400 bg-space-950/75 px-3 py-1 rounded-full border border-space-800 backdrop-blur-xs">
-          Arrastra con el ratón o dedo para rotar en 360° · Clic en los anillos para enfocar
-        </span>
       </div>
     </div>
   );

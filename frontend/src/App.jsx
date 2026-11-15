@@ -1,570 +1,486 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import GeneralDashboard from './modules/GeneralDashboard';
+import Dashboard from './modules/Dashboard';
 import BiomedicalTelemetry from './modules/BiomedicalTelemetry';
 import MissionSimulator from './modules/MissionSimulator';
-import AlertManagement from './modules/AlertManagement';
-import DataIntegration from './modules/DataIntegration';
-import InteractiveBodyMap from './components/InteractiveBodyMap';
-import SelfAssessment from './modules/SelfAssessment';
-import GamificationHub from './modules/GamificationHub';
 import MedicalHandbook from './modules/MedicalHandbook';
-import JsonModal from './components/JsonModal';
 import DataDictionaryModal from './components/DataDictionaryModal';
-import { Radio } from 'lucide-react';
+import { Radio, X, BookOpen } from 'lucide-react';
+import {
+  ALERTABLE_VITALS,
+  evaluateAllVitals,
+  severityAtLeast,
+} from './lib/clinical';
+import {
+  buildRiskInputs,
+  evaluateRisks,
+  RISK_ORDER,
+} from './lib/risks';
+import {
+  buildVitalCandidates,
+  buildRiskCandidates,
+  buildEcgCandidates,
+  reconcileAlerts,
+  acknowledgeAlert,
+  resolveAlert,
+  resolveAlertsForAstronaut,
+  summarizeAlerts,
+} from './lib/alerts';
+import {
+  createRecord,
+  getLatestRecord,
+  mergeCrewProfiles,
+  sortRecords,
+  summarizeRecords,
+} from './lib/records';
+import {
+  generateHistoryForCrew,
+  generateSyntheticSample,
+  getScenarioDefinition,
+} from './lib/simulation';
+import { getEnvironment } from './lib/environments';
+import {
+  loadRecords,
+  loadAlerts,
+  loadLogs,
+  loadRiskHistory,
+  loadSuppressedVitals,
+  createId,
+  writeJSON,
+  STORAGE_KEYS,
+} from './lib/storage';
+import { formatTime } from './lib/format';
 
-const MODULE_LABELS = {
-  general: 'Panel General',
-  bodymap: 'Astronauta 3D & Chequeo Corporal',
-  self_assessment: 'Autoevaluación de Salud & Ecógrafo',
-  telemetry: 'Telemetría y ECG',
-  gamification: 'AeroQuest: Rutinas y Gamificación',
-  handbook: 'Manual Médico & 5 Riesgos (NASA HRP)',
-  simulator: 'Simulador y Entornos Espaciales',
-  alerts: 'Alertas y Contramedidas',
-  integration: 'Integración y Datos',
+const SESSION_USER = {
+  name: 'Elena Vance',
+  role: 'Flight Surgeon',
+  initials: 'EV',
 };
 
-const ENVIRONMENTS_MAP = {
-  transit: {
-    id: 'transit',
-    name: 'Tránsito a Marte (Deep Space Transport)',
-    gravityG: 0.0,
-    gravityText: '0.00 G (Microgravedad)',
-    dailyRadiation: 1.8,
-    commDelay: '14.5 min',
+const CREW_SEED = {
+  ast_001: {
+    name: 'Neil A.',
+    role: 'Comandante de Misión',
+    activity: 'EVA',
+    age: 44,
+    sex: 'M',
+    heightCm: 182,
+    weightKg: 78,
+    bloodType: 'O+',
+    missionDays: 62,
   },
-  station: {
-    id: 'station',
-    name: 'Estación Orbital (Lunar Gateway)',
-    gravityG: 0.0,
-    gravityText: '0.00 G (Órbita protegida)',
-    dailyRadiation: 0.5,
-    commDelay: '1.3 seg',
+  ast_002: {
+    name: 'Ellen O.',
+    role: 'Especialista Biomédica',
+    activity: 'IVA',
+    age: 39,
+    sex: 'F',
+    heightCm: 168,
+    weightKg: 61,
+    bloodType: 'A+',
+    missionDays: 62,
   },
-  rover: {
-    id: 'rover',
-    name: 'Vehículo Explorador Superficial (Rover)',
-    gravityG: 0.38,
-    gravityText: '0.38 G (Gravedad Marciana)',
-    dailyRadiation: 1.1,
-    commDelay: '14.5 min',
-  },
-  base: {
-    id: 'base',
-    name: 'Base Superficial (Artemis Base Camp / Mars Hab)',
-    gravityG: 0.38,
-    gravityText: '0.38 G (Bóvedas de regolito)',
-    dailyRadiation: 0.36,
-    commDelay: '14.5 min',
+  ast_003: {
+    name: 'Pedro D.',
+    role: 'Ingeniero de Vuelo',
+    activity: 'REST',
+    age: 47,
+    sex: 'M',
+    heightCm: 176,
+    weightKg: 74,
+    bloodType: 'B+',
+    missionDays: 62,
   },
 };
 
-// Evaluación clínica integral de constantes vitales según estándares NASA HRP
-function evaluateVital(variable, value) {
-  if (variable === "heart_rate") {
-    if (value > 120 || value < 50) return { status: "alerta", msg: "Alerta crítica: ritmo cardíaco fuera de límites (>120 o <50 bpm)" };
-    if (value < 60 || value > 100) return { status: "advertencia", msg: "Fuera de rango óptimo (60-100 bpm)" };
-    return { status: "normal", msg: "Ritmo sinusal nominal" };
-  }
-  if (variable === "spo2") {
-    if (value < 90) return { status: "alerta", msg: "Alerta de hipoxia severa: SpO2 < 90%" };
-    if (value < 95) return { status: "advertencia", msg: "Saturación baja (90-94%)" };
-    return { status: "normal", msg: "Oxigenación celular nominal" };
-  }
-  if (variable === "temperature") {
-    if (value > 38.0) return { status: "alerta", msg: "Hipertermia / Fiebre detectada (>38.0 °C)" };
-    if (value < 36.1 || value > 37.2) return { status: "advertencia", msg: "Temperatura fuera de rango (36.1-37.2 °C)" };
-    return { status: "normal", msg: "Termorregulación nominal" };
-  }
-  if (variable === "respiratory_rate") {
-    if (value > 24 || value < 10) return { status: "alerta", msg: "Frecuencia respiratoria crítica (>24 o <10 rpm)" };
-    if (value < 12 || value > 20) return { status: "advertencia", msg: "Frecuencia fuera de rango (12-20 rpm)" };
-    return { status: "normal", msg: "Patrón ventilatorio nominal" };
-  }
-  if (variable === "systolic_bp") {
-    if (value > 140 || value < 90) return { status: "alerta", msg: "Presión sistólica fuera de límites (>140 o <90 mmHg)" };
-    if (value > 125 || value < 100) return { status: "advertencia", msg: "Prehipertensión espacial / fluid shift" };
-    return { status: "normal", msg: "Presión sistólica óptima" };
-  }
-  if (variable === "glucose") {
-    if (value > 140 || value < 65) return { status: "alerta", msg: "Desbalance glucémico significativo (>140 o <65 mg/dL)" };
-    if (value > 115 || value < 75) return { status: "advertencia", msg: "Variabilidad glucémica fuera del rango basal" };
-    return { status: "normal", msg: "Glucemia nominal en reposo" };
-  }
-  return { status: "normal", msg: "Nominal" };
-}
+const INITIAL_LOGS = [
+  { time: '16:20:00', level: 'INFO', message: 'Sistema modular de telemetría y soporte vital HRP inicializado.' },
+  { time: '16:21:15', level: 'SUCCESS', message: 'Enlace telemétrico sintético establecido con las escafandras.' },
+  { time: '16:22:40', level: 'INFO', message: 'Motor de alertas y modelo RIDGE cargados.' },
+  { time: '16:23:05', level: 'SUCCESS', message: 'Visor biomédico 3D acoplado a la telemetría en tiempo real.' },
+];
 
-// Generador sintético de telemetría expandido con Presión, Glucosa, Sueño, Estrés y SANS
-function generateSyntheticSample(scenario, envId = 'transit') {
-  let hr, spo2, temp, rr, systolic, diastolic, glucose, sleepHours, stressLevel, onsd, boneLoss;
-
-  switch (scenario) {
-    case "eva": // Paseo espacial con alta carga metabólica
-      hr = Math.round(106 + (Math.random() * 14 - 7));
-      spo2 = Number((96.6 + (Math.random() * 1.4 - 0.7)).toFixed(1));
-      temp = Number((37.2 + (Math.random() * 0.4 - 0.2)).toFixed(1));
-      rr = Math.round(21 + (Math.random() * 3 - 1.5));
-      systolic = Math.round(128 + (Math.random() * 8 - 4));
-      diastolic = Math.round(82 + (Math.random() * 6 - 3));
-      glucose = Number((86.0 + (Math.random() * 6 - 3)).toFixed(1));
-      sleepHours = 6.8;
-      stressLevel = 38;
-      onsd = 5.1;
-      boneLoss = 0.32;
-      break;
-
-    case "hypoxia": // Alerta de hipoxia / despresurización
-      hr = Math.round(134 + (Math.random() * 12 - 6));
-      spo2 = Number((86.2 + (Math.random() * 2.4 - 1.2)).toFixed(1));
-      temp = Number((36.5 + (Math.random() * 0.3 - 0.15)).toFixed(1));
-      rr = Math.round(27 + (Math.random() * 3 - 1.5));
-      systolic = Math.round(144 + (Math.random() * 10 - 5));
-      diastolic = Math.round(92 + (Math.random() * 6 - 3));
-      glucose = Number((118.0 + (Math.random() * 8 - 4)).toFixed(1));
-      sleepHours = 5.2;
-      stressLevel = 88;
-      onsd = 5.6;
-      boneLoss = 0.35;
-      break;
-
-    case "hyperthermia": // Estrés térmico / fallo refrigerante
-      hr = Math.round(119 + (Math.random() * 10 - 5));
-      spo2 = Number((95.6 + (Math.random() * 1.2 - 0.6)).toFixed(1));
-      temp = Number((38.5 + (Math.random() * 0.4 - 0.2)).toFixed(1));
-      rr = Math.round(23 + (Math.random() * 3 - 1.5));
-      systolic = Math.round(132 + (Math.random() * 8 - 4));
-      diastolic = Math.round(84 + (Math.random() * 4 - 2));
-      glucose = Number((104.0 + (Math.random() * 6 - 3)).toFixed(1));
-      sleepHours = 6.0;
-      stressLevel = 62;
-      onsd = 5.2;
-      boneLoss = 0.30;
-      break;
-
-    case "sleep": // Reposo / Sueño circadiano
-      hr = Math.round(57 + (Math.random() * 5 - 2.5));
-      spo2 = Number((98.9 + (Math.random() * 0.6 - 0.3)).toFixed(1));
-      temp = Number((36.3 + (Math.random() * 0.2 - 0.1)).toFixed(1));
-      rr = Math.round(12 + (Math.random() * 2 - 1));
-      systolic = Math.round(108 + (Math.random() * 4 - 2));
-      diastolic = Math.round(68 + (Math.random() * 4 - 2));
-      glucose = Number((88.0 + (Math.random() * 4 - 2)).toFixed(1));
-      sleepHours = 8.2;
-      stressLevel = 10;
-      onsd = 4.8;
-      boneLoss = 0.28;
-      break;
-
-    case "microgravity": // Nominal
-    default:
-      hr = Math.round(75 + (Math.random() * 8 - 4));
-      spo2 = Number((98.3 + (Math.random() * 1.0 - 0.5)).toFixed(1));
-      temp = Number((36.6 + (Math.random() * 0.3 - 0.15)).toFixed(1));
-      rr = Math.round(15 + (Math.random() * 2 - 1));
-      systolic = Math.round(118 + (Math.random() * 6 - 3));
-      diastolic = Math.round(76 + (Math.random() * 4 - 2));
-      glucose = Number((92.0 + (Math.random() * 5 - 2.5)).toFixed(1));
-      sleepHours = 7.8;
-      stressLevel = 18;
-      onsd = 4.9;
-      boneLoss = 0.28;
-      break;
-  }
-
-  hr = Math.max(35, Math.min(190, hr));
-  spo2 = Math.min(100, Math.max(70, spo2));
-  temp = Math.min(41, Math.max(34, temp));
-  rr = Math.max(6, Math.min(40, rr));
-
-  const timestamp = new Date().toTimeString().split(' ')[0];
-
+function calculateEnvironmentalData(environment) {
   return {
-    timestamp,
-    heart_rate: hr,
-    spo2,
-    temperature: temp,
-    respiratory_rate: rr,
-    systolic_bp: systolic,
-    diastolic_bp: diastolic,
-    glucose,
-    sleep_hours: sleepHours,
-    stress_level: stressLevel,
-    onsd_mm: onsd,
-    bone_loss_monthly: boneLoss,
+    suitPressure: Number((environment.cabinPressureKpa + (Math.random() * 0.4 - 0.2)).toFixed(1)),
+    radiation: Number((environment.radiationRateUsVh + (Math.random() * 1.2 - 0.6)).toFixed(1)),
+    co2Level: Number((environment.co2MmHg + (Math.random() * 0.2 - 0.1)).toFixed(1)),
   };
 }
 
 export default function App() {
-  const [activeModule, setActiveModule] = useState('general');
-  const [selectedAstronautId, setSelectedAstronautId] = useState("ast_001");
-  const [currentScenario, setCurrentScenario] = useState("microgravity");
-  const [currentEnvironment, setCurrentEnvironment] = useState("transit"); // transit, station, rover, base
+  const [activeModule, setActiveModule] = useState('dashboard');
+  const [dashboardTab, setDashboardTab] = useState('overview');
+  const [selectedAstronautId, setSelectedAstronautId] = useState('ast_001');
+  const [currentScenario, setCurrentScenario] = useState('microgravity');
+  const [currentEnvironment, setCurrentEnvironment] = useState('transit');
   const [isAutoSimulating, setIsAutoSimulating] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isHandbookOpen, setIsHandbookOpen] = useState(false);
 
-  // Gamificación
-  const [bioCredits, setBioCredits] = useState(1420);
-  const [healthStreak, setHealthStreak] = useState(12);
-
-  // Tripulación Artemis
-  const astronauts = {
-    ast_001: { name: "Neil A.", role: "Comandante de Misión", activity: "EVA" },
-    ast_002: { name: "Ellen O.", role: "Especialista Biomédica", activity: "IVA" },
-    ast_003: { name: "Pedro D.", role: "Ingeniero de Vuelo", activity: "REST" }
-  };
-
-  // Historial de telemetría por astronauta
-  const [telemetryHistory, setTelemetryHistory] = useState(() => {
-    const initial = {};
-    Object.keys(astronauts).forEach(id => {
-      const records = [];
-      const sc = id === "ast_001" ? "eva" : id === "ast_003" ? "sleep" : "microgravity";
-      for (let i = 12; i >= 0; i--) {
-        records.push(generateSyntheticSample(sc));
-      }
-      initial[id] = records;
-    });
-    return initial;
+  const [records, setRecords] = useState(() => loadRecords());
+  const [alerts, setAlerts] = useState(() => loadAlerts());
+  const [logs, setLogs] = useState(() => {
+    const stored = loadLogs();
+    return stored.length ? stored : INITIAL_LOGS;
   });
+  const [riskHistory, setRiskHistory] = useState(() => loadRiskHistory());
+  const [suppressedVitalsIds, setSuppressedVitalsIds] = useState(() => loadSuppressedVitals());
+  const [telemetryHistory, setTelemetryHistory] = useState(() => generateHistoryForCrew(CREW_SEED, 'transit'));
+  const [environmentalData, setEnvironmentalData] = useState(() =>
+    calculateEnvironmentalData(getEnvironment('transit')),
+  );
 
-  // Logs de la misión
-  const [logs, setLogs] = useState([
-    { time: "16:20:00", level: "INFO", message: "Sistema modular de telemetría y soporte vital HRP inicializado." },
-    { time: "16:21:15", level: "SUCCESS", message: "Enlace telemétrico con escafandras establecido a 100 Mbps (DSN Goldstone)." },
-    { time: "16:22:40", level: "INFO", message: "Árbol de alertas y protocolos de solución médica autónoma cargados." },
-    { time: "16:23:05", level: "SUCCESS", message: "Holograma biomédico interactivo 3D acoplado a telemetría en tiempo real." }
+  const environment = useMemo(() => getEnvironment(currentEnvironment), [currentEnvironment]);
+  const crew = useMemo(() => mergeCrewProfiles(CREW_SEED, records), [records]);
+  const recordSummary = useMemo(() => summarizeRecords(records), [records]);
+  const environmentRecord = useMemo(() => getLatestRecord(records, 'environment'), [records]);
+  const simulationRecord = useMemo(() => getLatestRecord(records, 'simulation'), [records]);
+
+  const latestVitalsRecords = useMemo(() => {
+    const map = {};
+    sortRecords(records.filter((record) => record.category === 'vitals' && record.astronautId)).forEach((record) => {
+      if (!map[record.astronautId]) map[record.astronautId] = record;
+    });
+    return map;
+  }, [records]);
+
+  const latestVitalsByAstronaut = useMemo(() => {
+    const result = {};
+    Object.keys(crew).forEach((id) => {
+      const history = telemetryHistory[id] || [];
+      const lastSample = history[history.length - 1] || generateSyntheticSample('microgravity', environment.id);
+      const record = latestVitalsRecords[id];
+      const useRecord = record && !suppressedVitalsIds.includes(record.id);
+
+      result[id] = useRecord
+        ? {
+            ...lastSample,
+            ...record.data,
+            origin: record.origin || 'manual',
+            recordedAt: record.recordedAt,
+            timestamp: formatTime(record.recordedAt),
+            source: 'Inserción de datos',
+            scenario: currentScenario,
+            environmentId: currentEnvironment,
+          }
+        : {
+            ...lastSample,
+            origin: lastSample.origin || 'simulated',
+          };
+    });
+    return result;
+  }, [
+    crew,
+    telemetryHistory,
+    latestVitalsRecords,
+    suppressedVitalsIds,
+    currentScenario,
+    currentEnvironment,
+    environment.id,
   ]);
 
-  // Telemetría ambiental ECLSS
-  const [environmentalData, setEnvironmentalData] = useState({
-    suitPressure: 29.6,
-    radiation: 18.2,
-    co2Level: 3.1
-  });
+  const selectedLatest = latestVitalsByAstronaut[selectedAstronautId] || {};
+  const selectedRecord = latestVitalsRecords[selectedAstronautId];
+  const hasSelectedOverlay = Boolean(selectedRecord && !suppressedVitalsIds.includes(selectedRecord.id));
+  const baseHistory = telemetryHistory[selectedAstronautId] || [];
+  const currentHistory = useMemo(() => {
+    if (hasSelectedOverlay) return [...baseHistory.slice(-29), selectedLatest];
+    return baseHistory;
+  }, [hasSelectedOverlay, baseHistory, selectedLatest]);
+  const prevSample = baseHistory.length > 1 ? baseHistory[baseHistory.length - 2] : selectedLatest;
 
-  const addLog = (level, message) => {
-    const time = new Date().toTimeString().split(' ')[0];
-    setLogs(prev => [...prev.slice(-50), { time, level, message }]);
-  };
+  const evaluations = useMemo(() => evaluateAllVitals(selectedLatest), [selectedLatest]);
+  const hasGlobalAlert = ALERTABLE_VITALS.some((key) => severityAtLeast(evaluations[key]?.status, 'critical'));
+  const alertSummary = useMemo(() => summarizeAlerts(alerts), [alerts]);
 
-  // Muestra actual del astronauta activo
-  const currentHistory = telemetryHistory[selectedAstronautId] || [];
-  const latestSample = currentHistory[currentHistory.length - 1] || generateSyntheticSample("microgravity", currentEnvironment);
-  const prevSample = currentHistory.length > 1 ? currentHistory[currentHistory.length - 2] : latestSample;
+  const missionDays = crew[selectedAstronautId]?.missionDays ?? 62;
+  const riskInputsBundle = useMemo(
+    () =>
+      buildRiskInputs({
+        environment,
+        latestSample: selectedLatest,
+        environmentRecord,
+        simulationRecord,
+        scenario: currentScenario,
+        missionDays,
+      }),
+    [environment, selectedLatest, environmentRecord, simulationRecord, currentScenario, missionDays],
+  );
 
-  const hrEval = evaluateVital("heart_rate", latestSample.heart_rate);
-  const spo2Eval = evaluateVital("spo2", latestSample.spo2);
-  const tempEval = evaluateVital("temperature", latestSample.temperature);
-  const rrEval = evaluateVital("respiratory_rate", latestSample.respiratory_rate);
-  const bpEval = evaluateVital("systolic_bp", latestSample.systolic_bp);
-  const glucEval = evaluateVital("glucose", latestSample.glucose);
+  const assessment = useMemo(
+    () =>
+      evaluateRisks(riskInputsBundle.inputs, {
+        environment,
+        latestSample: selectedLatest,
+        missionDays,
+        origin: riskInputsBundle.origin,
+      }),
+    [riskInputsBundle, environment, selectedLatest, missionDays],
+  );
 
-  const hasGlobalAlert = hrEval.status === "alerta" || spo2Eval.status === "alerta" || tempEval.status === "alerta" || rrEval.status === "alerta" || bpEval.status === "alerta";
+  const alertCandidates = useMemo(
+    () => [
+      ...buildVitalCandidates(latestVitalsByAstronaut, crew),
+      ...buildRiskCandidates(assessment),
+      ...buildEcgCandidates(records, crew),
+    ],
+    [latestVitalsByAstronaut, crew, assessment, records],
+  );
 
-  // Calcular alertas activas en toda la tripulación
-  const activeAlerts = [];
-  const latestVitalsByAstronaut = {};
-
-  Object.entries(astronauts).forEach(([id, ast]) => {
-    const h = telemetryHistory[id] || [];
-    const last = h[h.length - 1];
-    if (last) {
-      const eHr = evaluateVital("heart_rate", last.heart_rate);
-      const eSpo2 = evaluateVital("spo2", last.spo2);
-      const eTemp = evaluateVital("temperature", last.temperature);
-      const eRr = evaluateVital("respiratory_rate", last.respiratory_rate);
-      const eBp = evaluateVital("systolic_bp", last.systolic_bp);
-
-      const isAnyAlert = eHr.status === "alerta" || eSpo2.status === "alerta" || eTemp.status === "alerta" || eRr.status === "alerta" || eBp.status === "alerta";
-
-      latestVitalsByAstronaut[id] = {
-        ...last,
-        isAlert: isAnyAlert
-      };
-
-      if (eHr.status === "alerta") {
-        activeAlerts.push({
-          astronautId: id,
-          astronautName: ast.name,
-          variable: "Frecuencia Cardíaca",
-          value: last.heart_rate,
-          unit: "bpm",
-          severity: "CRITICAL",
-          message: eHr.msg,
-          timestamp: last.timestamp
-        });
-      }
-      if (eSpo2.status === "alerta") {
-        activeAlerts.push({
-          astronautId: id,
-          astronautName: ast.name,
-          variable: "SpO2 (Oxígeno)",
-          value: last.spo2,
-          unit: "%",
-          severity: "CRITICAL",
-          message: eSpo2.msg,
-          timestamp: last.timestamp
-        });
-      }
-      if (eTemp.status === "alerta") {
-        activeAlerts.push({
-          astronautId: id,
-          astronautName: ast.name,
-          variable: "Temperatura Corporal",
-          value: last.temperature,
-          unit: "°C",
-          severity: "CRITICAL",
-          message: eTemp.msg,
-          timestamp: last.timestamp
-        });
-      }
-      if (eRr.status === "alerta") {
-        activeAlerts.push({
-          astronautId: id,
-          astronautName: ast.name,
-          variable: "Frecuencia Respiratoria",
-          value: last.respiratory_rate,
-          unit: "rpm",
-          severity: "CRITICAL",
-          message: eRr.msg,
-          timestamp: last.timestamp
-        });
-      }
-      if (eBp.status === "alerta") {
-        activeAlerts.push({
-          astronautId: id,
-          astronautName: ast.name,
-          variable: "Presión Arterial Sistólica",
-          value: last.systolic_bp,
-          unit: "mmHg",
-          severity: "CRITICAL",
-          message: eBp.msg,
-          timestamp: last.timestamp
-        });
-      }
-    }
-  });
-
-  // Generar un tick de simulación
-  const handleTick = (customScenario = null) => {
-    const sc = customScenario || currentScenario;
-    const newSample = generateSyntheticSample(sc, currentEnvironment);
-
-    setTelemetryHistory(prev => {
-      const currentList = prev[selectedAstronautId] || [];
-      const updatedList = [...currentList.slice(-25), newSample];
-      return {
-        ...prev,
-        [selectedAstronautId]: updatedList
-      };
-    });
-
-    setEnvironmentalData(() => {
-      const envInfo = ENVIRONMENTS_MAP[currentEnvironment] || ENVIRONMENTS_MAP.transit;
-      return {
-        suitPressure: Number((29.6 + (Math.random() * 0.4 - 0.2)).toFixed(1)),
-        radiation: Number((envInfo.dailyRadiation * 10 + (Math.random() * 1.2 - 0.6)).toFixed(1)),
-        co2Level: Number((3.1 + (Math.random() * 0.2 - 0.1)).toFixed(1))
-      };
-    });
-  };
-
-  // Simulación continua cada 2 segundos
+  const alertSignatureRef = useRef('');
   useEffect(() => {
-    if (!isAutoSimulating) return;
+    const signature = alertCandidates
+      .map((candidate) => `${candidate.dedupeKey}:${candidate.severity}:${candidate.value}`)
+      .join('|');
+    if (signature === alertSignatureRef.current) return;
+    alertSignatureRef.current = signature;
+    setAlerts((previous) => reconcileAlerts(previous, alertCandidates));
+  }, [alertCandidates]);
 
-    const interval = setInterval(() => {
-      handleTick();
-    }, 2000);
+  const riskSignatureRef = useRef('');
+  useEffect(() => {
+    if (!assessment) return;
+    const signature = `${assessment.overall.score}:${RISK_ORDER.map((key) => assessment.risks[key].score).join('-')}:${assessment.origin}`;
+    if (signature === riskSignatureRef.current) return;
+    riskSignatureRef.current = signature;
+    setRiskHistory((previous) => [
+      {
+        id: createId('risk'),
+        timestamp: assessment.generatedAt,
+        score: assessment.overall.score,
+        level: assessment.overall.level,
+        levelInfo: assessment.overall.levelInfo,
+        worstCode: assessment.overall.worstRisk.code,
+        worstName: assessment.overall.worstRisk.shortName,
+        origin: assessment.origin,
+        scores: RISK_ORDER.reduce((acc, key) => {
+          acc[key] = assessment.risks[key].score;
+          return acc;
+        }, {}),
+      },
+      ...previous,
+    ].slice(0, 60));
+  }, [assessment]);
 
-    return () => clearInterval(interval);
-  }, [isAutoSimulating, currentScenario, currentEnvironment, selectedAstronautId]);
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.records, records);
+  }, [records]);
 
-  // Selección de escenario
-  const handleSelectScenario = (scId) => {
-    setCurrentScenario(scId);
-    addLog("INFO", `Escenario de simulación cambiado a [${scId.toUpperCase()}] para ${astronauts[selectedAstronautId].name}`);
-    handleTick(scId);
-  };
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.suppressedVitals, suppressedVitalsIds.slice(-120));
+  }, [suppressedVitalsIds]);
 
-  // Selección de entorno espacial
-  const handleSelectEnvironment = (envId) => {
-    setCurrentEnvironment(envId);
-    const envInfo = ENVIRONMENTS_MAP[envId] || ENVIRONMENTS_MAP.transit;
-    addLog("INFO", `Entorno operativo actualizado a: ${envInfo.name} (${envInfo.gravityText}). Factores RIDGE recalculados.`);
-    handleTick();
-  };
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.alerts, alerts);
+  }, [alerts]);
 
-  // Inyección de anomalía de emergencia
-  const handleTriggerEmergency = () => {
-    setCurrentScenario("hypoxia");
-    addLog("CRITICAL", `[EMERGENCIA] Despresurización simulada en ${astronauts[selectedAstronautId].name}`);
-    handleTick("hypoxia");
-  };
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.logs, logs.slice(-120));
+  }, [logs]);
 
-  // Restablecer nominal
-  const handleResetNominal = () => {
-    setCurrentScenario("microgravity");
-    addLog("SUCCESS", `Sistemas estabilizados a condiciones NOMINALES para toda la tripulación.`);
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.riskHistory, riskHistory.slice(0, 60));
+  }, [riskHistory]);
 
-    setTelemetryHistory(prev => {
-      const next = {};
-      Object.keys(astronauts).forEach(id => {
-        const currentList = prev[id] || [];
-        next[id] = [...currentList.slice(-25), generateSyntheticSample("microgravity", currentEnvironment)];
+  const addLog = useCallback((level, message) => {
+    setLogs((previous) => [
+      ...previous.slice(-119),
+      { time: formatTime(new Date()), level, message, timestamp: new Date().toISOString() },
+    ]);
+  }, []);
+
+  const pushSamples = useCallback(
+    (scenarioOverride = null) => {
+      setTelemetryHistory((previous) => {
+        const next = { ...previous };
+        Object.keys(CREW_SEED).forEach((id) => {
+          const scenario =
+            scenarioOverride ||
+            (id === selectedAstronautId ? currentScenario : id === 'ast_003' ? 'sleep' : 'microgravity');
+          next[id] = [...(previous[id] || []).slice(-39), generateSyntheticSample(scenario, currentEnvironment)];
+        });
+        return next;
       });
-      return next;
-    });
-  };
-
-  // Aplicar contramedida médica para una alerta específica
-  const handleApplyCountermeasure = (astId, variableName) => {
-    const ast = astronauts[astId];
-    addLog("SUCCESS", `[CONTRAMEDIDA AUTÓNOMA] Protocolo clínico ejecutado para ${ast?.name} (${variableName}).`);
-
-    setTelemetryHistory(prev => {
-      const currentList = prev[astId] || [];
-      const normalizedSample = {
-        timestamp: new Date().toTimeString().split(' ')[0],
-        heart_rate: 76,
-        spo2: 98.4,
-        temperature: 36.6,
-        respiratory_rate: 15,
-        systolic_bp: 118,
-        diastolic_bp: 76,
-        glucose: 92,
-        sleep_hours: 7.8,
-        stress_level: 18,
-        onsd_mm: 4.9,
-        bone_loss_monthly: 0.28,
-      };
-      return {
-        ...prev,
-        [astId]: [...currentList.slice(-25), normalizedSample]
-      };
-    });
-
-    setBioCredits(prev => prev + 80);
-    setCurrentScenario("microgravity");
-  };
-
-  // Guardar datos provenientes de la autoevaluación activa del astronauta
-  const handleSaveAssessment = (astId, assessmentData) => {
-    const ast = astronauts[astId];
-    addLog("SUCCESS", `[AUTOEVALUACIÓN] Nuevos registros clínicos cargados por ${ast?.name}: PA ${assessmentData.systolic_bp}/${assessmentData.diastolic_bp}, Glucosa ${assessmentData.glucose} mg/dL.`);
-
-    setTelemetryHistory(prev => {
-      const currentList = prev[astId] || [];
-      const last = currentList[currentList.length - 1] || generateSyntheticSample("microgravity", currentEnvironment);
-      const updatedSample = {
-        ...last,
-        timestamp: new Date().toTimeString().split(' ')[0],
-        systolic_bp: assessmentData.systolic_bp,
-        diastolic_bp: assessmentData.diastolic_bp,
-        glucose: assessmentData.glucose,
-        sleep_hours: assessmentData.sleep_hours,
-        stress_level: assessmentData.stress_level,
-        onsd_mm: assessmentData.onsd_mm || last.onsd_mm,
-      };
-      return {
-        ...prev,
-        [astId]: [...currentList.slice(-25), updatedSample]
-      };
-    });
-  };
-
-  // Otorgar puntos de gamificación
-  const handleAwardGamificationPoints = (amount, reason) => {
-    setBioCredits(prev => prev + amount);
-    addLog("SUCCESS", `[AEROQUEST] +${amount} Bio-Créditos otorgados: ${reason}`);
-  };
-
-  const currentEnvInfo = ENVIRONMENTS_MAP[currentEnvironment] || ENVIRONMENTS_MAP.transit;
-
-  // Contrato JSON exacto según docs/ARCHITECTURE.md y estándar NASA HRP
-  const currentJsonPacket = {
-    metadata: {
-      source: "simulation_engine_v2_hrp",
-      is_synthetic: true,
-      mission_id: "mars_001",
-      scenario: currentScenario,
-      environment: currentEnvironment,
+      setEnvironmentalData(calculateEnvironmentalData(environment));
     },
-    environment_context: {
-      name: currentEnvInfo.name,
-      gravity_g: currentEnvInfo.gravityG,
-      daily_radiation_msv: currentEnvInfo.dailyRadiation,
-      earth_latency: currentEnvInfo.commDelay,
-    },
-    astronaut: {
-      id: selectedAstronautId,
-      name: astronauts[selectedAstronautId]?.name || "Neil A.",
-      bio_credits: bioCredits,
-      health_streak_days: healthStreak,
-    },
-    vital_signs: {
-      timestamp: new Date().toISOString(),
-      heart_rate: {
-        value: latestSample.heart_rate,
-        unit: "bpm",
-        status: hrEval.status
-      },
-      blood_pressure: {
-        systolic: latestSample.systolic_bp || 118,
-        diastolic: latestSample.diastolic_bp || 76,
-        unit: "mmHg",
-        status: bpEval.status
-      },
-      blood_glucose: {
-        value: latestSample.glucose || 92,
-        unit: "mg/dL",
-        status: glucEval.status
-      },
-      spo2: {
-        value: latestSample.spo2,
-        unit: "%",
-        status: spo2Eval.status
-      },
-      temperature: {
-        value: latestSample.temperature,
-        unit: "°C",
-        status: tempEval.status
-      },
-      respiratory_rate: {
-        value: latestSample.respiratory_rate,
-        unit: "rpm",
-        status: rrEval.status
-      },
-      sleep_tracking: {
-        duration_hours: latestSample.sleep_hours || 7.8,
-        quality: "REM Estable",
-        status: "normal"
-      },
-      mental_health: {
-        stress_percentage: latestSample.stress_level || 18,
-        cognitive_readiness: 94,
-        status: "normal"
-      },
-      ocular_sans: {
-        optic_nerve_sheath_diameter_mm: latestSample.onsd_mm || 4.9,
-        risk_level: "Bajo (Sin papiledema)",
-        status: "normal"
-      },
-      bone_health: {
-        estimated_monthly_loss_pct: latestSample.bone_loss_monthly || 0.28,
-        status: "normal"
-      }
+    [selectedAstronautId, currentScenario, currentEnvironment, environment],
+  );
+
+  useEffect(() => {
+    if (!isAutoSimulating) return undefined;
+    const interval = window.setInterval(() => pushSamples(), 2500);
+    return () => window.clearInterval(interval);
+  }, [isAutoSimulating, pushSamples]);
+
+  const handleSelectModule = (id) => {
+    setActiveModule(id);
+  };
+
+  const handleSelectAstronaut = (id) => {
+    setSelectedAstronautId(id);
+    addLog('INFO', `Foco telemétrico cambiado a: ${crew[id]?.name || id}`);
+  };
+
+  const handleSelectScenario = (scenarioId) => {
+    setCurrentScenario(scenarioId);
+    const scenario = getScenarioDefinition(scenarioId);
+    addLog('INFO', `Escenario de simulación cambiado a [${scenario.code}] ${scenario.name}.`);
+    pushSamples(scenarioId);
+  };
+
+  const handleSelectEnvironment = (environmentId) => {
+    setCurrentEnvironment(environmentId);
+    const nextEnvironment = getEnvironment(environmentId);
+    setEnvironmentalData(calculateEnvironmentalData(nextEnvironment));
+    addLog('INFO', `Entorno operativo actualizado a ${nextEnvironment.name}. Factores RIDGE recalculados.`);
+    pushSamples();
+  };
+
+  const handleTriggerEmergency = () => {
+    setCurrentScenario('hypoxia');
+    addLog('CRITICAL', '[EMERGENCIA SIMULADA] Despresurización parcial inyectada en la tripulación.');
+    pushSamples('hypoxia');
+  };
+
+  const handleResetNominal = () => {
+    const now = new Date().toISOString();
+    setCurrentScenario('microgravity');
+    setSuppressedVitalsIds(Object.values(latestVitalsRecords).map((record) => record.id));
+    setAlerts((previous) =>
+      previous.map((alert) =>
+        alert.kind === 'vital' && alert.status !== 'resolved'
+          ? { ...alert, status: 'resolved', resolvedAt: now, lastSeenAt: now }
+          : alert,
+      ),
+    );
+    addLog('SUCCESS', 'Telemetría estabilizada a condiciones nominales para toda la tripulación.');
+    pushSamples('microgravity');
+  };
+
+  const handleApplyCountermeasure = (alert) => {
+    if (!alert || alert.kind !== 'vital' || !alert.astronautId) return;
+    const astronautRecord = latestVitalsRecords[alert.astronautId];
+    if (astronautRecord) {
+      setSuppressedVitalsIds((previous) => [...new Set([...previous, astronautRecord.id])]);
     }
+
+    const nominalSample = {
+      ...generateSyntheticSample('microgravity', currentEnvironment),
+      origin: 'simulated',
+      source: 'contramedida_autonoma',
+      scenario: 'microgravity',
+      recordedAt: new Date().toISOString(),
+      timestamp: formatTime(new Date()),
+    };
+
+    setTelemetryHistory((previous) => {
+      const list = previous[alert.astronautId] || [];
+      return {
+        ...previous,
+        [alert.astronautId]: [...list.slice(-39), nominalSample],
+      };
+    });
+
+    setAlerts((previous) => resolveAlertsForAstronaut(previous, alert.astronautId));
+    if (alert.astronautId === selectedAstronautId) setCurrentScenario('microgravity');
+    addLog(
+      'SUCCESS',
+      `[CONTRAMEDIDA] Protocolo aplicado a ${alert.astronautName || alert.astronautId} (${alert.parameter}). Normalización simulada registrada.`,
+    );
+  };
+
+  const handleAcknowledgeAlert = (alertId) => {
+    setAlerts((previous) => acknowledgeAlert(previous, alertId));
+    addLog('INFO', 'Alerta marcada como atendida por el operador.');
+  };
+
+  const handleResolveAlert = (alertId) => {
+    setAlerts((previous) => resolveAlert(previous, alertId));
+    addLog('SUCCESS', 'Alerta marcada como resuelta por el operador.');
+  };
+
+  const handleSaveRecord = ({ category, data, existingId }) => {
+    const existing = existingId ? records.find((record) => record.id === existingId) : null;
+    const record = createRecord({ category, data, existing });
+
+    setRecords((previous) =>
+      existing ? previous.map((item) => (item.id === record.id ? record : item)) : [record, ...previous],
+    );
+
+    if (category === 'vitals') {
+      setSuppressedVitalsIds((previous) => previous.filter((id) => id !== record.id));
+    }
+
+    if (category === 'environment') {
+      setEnvironmentalData((previous) => ({
+        ...previous,
+        suitPressure: record.data.pressureKpa ?? previous.suitPressure,
+        radiation: record.data.radiationRateMsvDay ?? previous.radiation,
+        co2Level: record.data.co2MmHg ?? previous.co2Level,
+      }));
+    }
+
+    if (category === 'simulation' && record.data.applyToSimulator) {
+      if (record.data.scenario) setCurrentScenario(record.data.scenario);
+      if (record.data.environmentId) setCurrentEnvironment(record.data.environmentId);
+      addLog('INFO', `[SIMULACIÓN] Escenario aplicado desde registro: ${record.data.scenario} · ${record.data.environmentId}.`);
+    }
+
+    addLog(
+      'SUCCESS',
+      `[INSERCIÓN DE DATOS] ${existing ? 'Registro actualizado' : 'Registro creado'} · ${category} · origen ${record.origin}.`,
+    );
+    return record;
+  };
+
+  const handleDeleteRecord = (recordId) => {
+    const record = records.find((item) => item.id === recordId);
+    setRecords((previous) => previous.filter((item) => item.id !== recordId));
+    setSuppressedVitalsIds((previous) => previous.filter((id) => id !== recordId));
+    addLog('INFO', `[INSERCIÓN DE DATOS] Registro eliminado · ${record?.category || 'desconocido'}.`);
+  };
+
+  const handleSaveSimulationRun = () => {
+    const inputs = riskInputsBundle.inputs;
+    const scenario = getScenarioDefinition(currentScenario);
+    const data = {
+      recordedAt: new Date().toISOString(),
+      scenario: currentScenario,
+      environmentId: currentEnvironment,
+      durationMin: 120,
+      gravityG: inputs.gravityG,
+      radiationRateMsvDay: inputs.radiationRateMsvDay,
+      cumulativeRadiationMsv: inputs.cumulativeRadiationMsv,
+      o2Pct: inputs.o2Pct,
+      co2MmHg: inputs.co2MmHg,
+      cabinTempC: inputs.cabinTempC,
+      isolationDays: inputs.isolationDays,
+      sleepHours: inputs.sleepHours,
+      stressLevel: inputs.stressLevel,
+      moodScore: inputs.moodScore,
+      socialContactsPerWeek: inputs.socialContactsPerWeek,
+      autonomyPct: inputs.autonomyPct,
+      medicalStockPct: inputs.medicalStockPct,
+      result: `Corrida ${scenario.name} en ${environment.shortName}. Riesgo global ${assessment.overall.score}/100 (${assessment.overall.levelInfo.label}).`,
+      origin: 'simulated',
+      notes: 'Registro creado desde el simulador. Datos 100% sintéticos.',
+      applyToSimulator: false,
+    };
+    const record = createRecord({ category: 'simulation', data });
+    setRecords((previous) => [record, ...previous]);
+    addLog('SUCCESS', `[SIMULACIÓN] Corrida guardada · ${scenario.code} · ${environment.shortName}.`);
+    return record;
+  };
+
+  const openDashboardTab = (tab) => {
+    setActiveModule('dashboard');
+    setDashboardTab(tab);
   };
 
   return (
     <div className="relative flex min-h-screen w-full overflow-x-hidden text-slate-100">
-      {/* Ambient console backdrop */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
         aria-hidden="true"
@@ -574,120 +490,72 @@ export default function App() {
         }}
       />
 
-      {/* Sidebar de navegación */}
       <Sidebar
         activeModule={activeModule}
-        setActiveModule={setActiveModule}
-        astronauts={astronauts}
-        selectedAstronautId={selectedAstronautId}
-        setSelectedAstronautId={(id) => {
-          setSelectedAstronautId(id);
-          addLog("INFO", `Foco telemétrico cambiado a: ${astronauts[id].name}`);
-        }}
-        totalAlertsCount={activeAlerts.length}
-        soundEnabled={soundEnabled}
-        setSoundEnabled={setSoundEnabled}
-        missionId="mars_001"
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
+        setActiveModule={handleSelectModule}
+        alertCount={alertSummary.active}
       />
 
-      {/* Área Principal */}
       <div className="relative z-10 flex min-h-screen min-w-0 flex-1 flex-col">
+        <Header user={SESSION_USER} />
 
-        {/* Header Superior */}
-        <Header
-          missionId="mars_001"
-          activeModuleLabel={MODULE_LABELS[activeModule]}
-          onOpenJson={() => setIsJsonModalOpen(true)}
-          onOpenDictionary={() => setIsDictionaryOpen(true)}
-          hasAlert={activeAlerts.length > 0}
-          alertCount={activeAlerts.length}
-          soundEnabled={soundEnabled}
-          setSoundEnabled={setSoundEnabled}
-          mobileMenuOpen={mobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}
-          environmentInfo={currentEnvInfo}
-          bioCredits={bioCredits}
-          healthStreak={healthStreak}
-        />
-
-        {/* Módulo Activo */}
         <main className="flex-1 w-full">
-          <div className="mx-auto w-full max-w-[1680px] px-3.5 pb-5 pt-4 sm:px-5 sm:pt-5 lg:px-6">
+          <div className="mx-auto w-full max-w-[1680px] px-3.5 pb-24 pt-4 sm:px-5 sm:pt-5 lg:px-6 lg:pb-6">
             <div key={activeModule} className="animate-slide-up">
-
-              {activeModule === 'general' && (
-                <GeneralDashboard
-                  missionId="mars_001"
-                  astronauts={astronauts}
+              {activeModule === 'dashboard' ? (
+                <Dashboard
+                  tab={dashboardTab}
+                  setTab={setDashboardTab}
+                  astronauts={crew}
+                  crew={crew}
                   selectedAstronautId={selectedAstronautId}
-                  setSelectedAstronautId={setSelectedAstronautId}
+                  setSelectedAstronautId={handleSelectAstronaut}
                   latestVitalsByAstronaut={latestVitalsByAstronaut}
-                  activeAlerts={activeAlerts}
-                  environmentalData={environmentalData}
+                  latestSample={selectedLatest}
+                  evaluations={evaluations}
+                  assessment={assessment}
+                  environment={environment}
                   currentScenario={currentScenario}
-                  setActiveModule={setActiveModule}
-                  onResetNominal={handleResetNominal}
-                  currentEnvironmentInfo={currentEnvInfo}
-                  latestSample={latestSample}
-                  bioCredits={bioCredits}
-                  healthStreak={healthStreak}
-                />
-              )}
-
-              {activeModule === 'bodymap' && (
-                <InteractiveBodyMap
-                  currentSample={latestSample}
-                  selectedAstronaut={astronauts[selectedAstronautId]}
+                  alerts={alerts}
+                  alertSummary={alertSummary}
+                  records={records}
+                  recordSummary={recordSummary}
+                  riskHistory={riskHistory}
+                  riskInputs={riskInputsBundle.inputs}
+                  onAcknowledgeAlert={handleAcknowledgeAlert}
+                  onResolveAlert={handleResolveAlert}
                   onApplyCountermeasure={handleApplyCountermeasure}
-                  envInfo={currentEnvInfo}
+                  onResetNominal={handleResetNominal}
+                  onSaveRecord={handleSaveRecord}
+                  onDeleteRecord={handleDeleteRecord}
+                  onOpenDictionary={() => setIsDictionaryOpen(true)}
+                  onOpenHandbook={() => setIsHandbookOpen(true)}
+                  onOpenTelemetry={() => setActiveModule('telemetry')}
+                  onOpenSimulator={() => setActiveModule('simulator')}
                 />
-              )}
+              ) : null}
 
-              {activeModule === 'self_assessment' && (
-                <SelfAssessment
-                  astronauts={astronauts}
-                  selectedAstronautId={selectedAstronautId}
-                  onSaveAssessment={handleSaveAssessment}
-                  onAwardGamificationPoints={handleAwardGamificationPoints}
-                  currentTelemetry={latestSample}
-                />
-              )}
-
-              {activeModule === 'telemetry' && (
+              {activeModule === 'telemetry' ? (
                 <BiomedicalTelemetry
-                  astronauts={astronauts}
+                  astronauts={crew}
                   selectedAstronautId={selectedAstronautId}
-                  setSelectedAstronautId={setSelectedAstronautId}
+                  setSelectedAstronautId={handleSelectAstronaut}
                   latestVitalsByAstronaut={latestVitalsByAstronaut}
                   currentHistory={currentHistory}
-                  latestSample={latestSample}
+                  latestSample={selectedLatest}
                   prevSample={prevSample}
-                  hrEval={hrEval}
-                  spo2Eval={spo2Eval}
-                  tempEval={tempEval}
-                  rrEval={rrEval}
-                  soundEnabled={soundEnabled}
-                  hasGlobalAlert={hasGlobalAlert}
+                  evaluations={evaluations}
                   currentScenario={currentScenario}
+                  environment={environment}
+                  records={records}
+                  alertSummary={alertSummary}
+                  hasGlobalAlert={hasGlobalAlert}
+                  onOpenAlerts={() => openDashboardTab('alerts')}
+                  onOpenData={() => openDashboardTab('data')}
                 />
-              )}
+              ) : null}
 
-              {activeModule === 'gamification' && (
-                <GamificationHub
-                  bioCredits={bioCredits}
-                  healthStreak={healthStreak}
-                  onAwardPoints={handleAwardGamificationPoints}
-                  selectedAstronaut={astronauts[selectedAstronautId]}
-                />
-              )}
-
-              {activeModule === 'handbook' && (
-                <MedicalHandbook />
-              )}
-
-              {activeModule === 'simulator' && (
+              {activeModule === 'simulator' ? (
                 <MissionSimulator
                   currentScenario={currentScenario}
                   handleSelectScenario={handleSelectScenario}
@@ -695,40 +563,26 @@ export default function App() {
                   handleSelectEnvironment={handleSelectEnvironment}
                   isAutoSimulating={isAutoSimulating}
                   setIsAutoSimulating={setIsAutoSimulating}
-                  handleTick={handleTick}
+                  handleTick={() => pushSamples()}
                   handleTriggerEmergency={handleTriggerEmergency}
                   handleResetNominal={handleResetNominal}
                   environmentalData={environmentalData}
                   logs={logs}
-                  astronauts={astronauts}
+                  astronauts={crew}
                   selectedAstronautId={selectedAstronautId}
+                  environment={environment}
+                  assessment={assessment}
+                  riskInputs={riskInputsBundle}
+                  records={records}
+                  onSaveRun={handleSaveSimulationRun}
+                  onOpenRisks={() => openDashboardTab('risks')}
+                  onOpenDataEntry={() => openDashboardTab('data')}
                 />
-              )}
-
-              {activeModule === 'alerts' && (
-                <AlertManagement
-                  activeAlerts={activeAlerts}
-                  onApplyCountermeasure={handleApplyCountermeasure}
-                  onResetNominal={handleResetNominal}
-                  onTriggerEmergency={handleTriggerEmergency}
-                  astronauts={astronauts}
-                />
-              )}
-
-              {activeModule === 'integration' && (
-                <DataIntegration
-                  currentJsonPacket={currentJsonPacket}
-                  logs={logs}
-                  selectedAstronautId={selectedAstronautId}
-                  astronauts={astronauts}
-                />
-              )}
-
+              ) : null}
             </div>
           </div>
         </main>
 
-        {/* Footer */}
         <footer className="mt-auto border-t border-space-800/80 bg-space-950/55">
           <div className="mx-auto flex w-full max-w-[1680px] flex-col items-center justify-between gap-2 px-4 py-3 text-center font-mono text-[10px] text-slate-500 sm:flex-row sm:px-6 sm:text-left">
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-start">
@@ -742,7 +596,7 @@ export default function App() {
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:justify-end">
               <span>ORION MCC-H</span>
               <span className="text-slate-700">/</span>
-              <span>NASA HRP (RIDGE COMPLIANT)</span>
+              <span>NASA HRP · RIDGE</span>
               <span className="text-slate-700">/</span>
               <span className="flex items-center gap-1.5 text-telemetry-green">
                 <span className="h-1.5 w-1.5 rounded-full bg-telemetry-green" />
@@ -751,21 +605,33 @@ export default function App() {
             </div>
           </div>
         </footer>
-
       </div>
 
-      {/* Modales Globales */}
-      <JsonModal
-        isOpen={isJsonModalOpen}
-        onClose={() => setIsJsonModalOpen(false)}
-        currentPacket={currentJsonPacket}
-      />
+      {isHandbookOpen ? (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-space-950/80 p-2 backdrop-blur-md sm:p-4">
+          <div className="relative my-2 w-full max-w-[1440px] rounded-lg border border-space-700 bg-space-950 shadow-2xl sm:my-4">
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-t-lg border-b border-space-700 bg-space-950/95 px-3 py-2 backdrop-blur-xl">
+              <span className="flex items-center gap-2 font-heading text-[12px] font-bold text-slate-200">
+                <BookOpen className="h-4 w-4 text-telemetry-cyan" aria-hidden="true" />
+                Manual médico NASA HRP · cinco riesgos RIDGE
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsHandbookOpen(false)}
+                className="btn btn-ghost btn-icon"
+                aria-label="Cerrar manual"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="p-2 sm:p-3">
+              <MedicalHandbook />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
-      <DataDictionaryModal
-        isOpen={isDictionaryOpen}
-        onClose={() => setIsDictionaryOpen(false)}
-      />
-
+      <DataDictionaryModal isOpen={isDictionaryOpen} onClose={() => setIsDictionaryOpen(false)} />
     </div>
   );
 }

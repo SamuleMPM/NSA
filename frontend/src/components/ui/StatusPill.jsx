@@ -4,6 +4,7 @@ const VARIANTS = {
   nominal: 'pill-green',
   warning: 'pill-amber',
   critical: 'pill-red',
+  emergency: 'pill-emergency',
   info: 'pill-cyan',
   accent: 'pill-cyan',
   violet: 'pill-violet',
