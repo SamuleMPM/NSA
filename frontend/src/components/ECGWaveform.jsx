@@ -247,10 +247,10 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
               <span className="mono rounded border border-[#C9D9F5] bg-[#DBEAFE] px-1.5 py-0.5 text-[8px] font-bold tracking-widest text-[#0B3D91]">
                 LEAD II
               </span>
-              <span className="mono text-[8px] tracking-widest text-[#47598A]">P-Q-R-S-T</span>
+              <span className="mono text-[8px] tracking-widest text-[#000000]">P-Q-R-S-T</span>
             </div>
 
-            <div className="pointer-events-none absolute bottom-2 left-2.5 flex items-center gap-2 font-mono text-[8px] text-[#47598A]">
+            <div className="pointer-events-none absolute bottom-2 left-2.5 flex items-center gap-2 font-mono text-[8px] text-[#000000]">
               <span>25 mm/s</span>
               <span className="h-2 w-px bg-[#C9D9F5]" />
               <span>10 mm/mV</span>
@@ -271,7 +271,7 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
               <span className="eyebrow block">HEART RATE</span>
               <span className="value-md text-[#0B1B3A]">{safeHeartRate}</span>
             </div>
-            <span className="mono text-[9px] text-[#47598A]">BPM</span>
+            <span className="mono text-[9px] text-[#000000]">BPM</span>
           </div>
 
           <div className="panel-inset flex items-center justify-between gap-2 px-2.5 py-2">
@@ -298,7 +298,7 @@ export default function ECGWaveform({ heartRate = 75, isAlert = false, soundEnab
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#C9D9F5] px-4 py-2 font-mono text-[9px] text-[#47598A]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#C9D9F5] px-4 py-2 font-mono text-[9px] text-[#000000]">
         <span className="flex items-center gap-1.5">
           <Zap className="h-3 w-3 text-[#0B3D91]" aria-hidden="true" />
           FILTRO DIGITAL ACTIVO · 250 Hz

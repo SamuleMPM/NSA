@@ -40,7 +40,7 @@ export default function ModuleHeader({
               {title}
             </h1>
             {description ? (
-              <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-[#47598A]">
+              <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-[#000000]">
                 {description}
               </p>
             ) : null}

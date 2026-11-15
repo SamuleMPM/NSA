@@ -16,8 +16,8 @@
     --co-background: #EAF1FE;
     --co-surface: #FFFFFF;
     --co-border: #C9D9F5;
-    --co-text-primary: #0B1B3A;
-    --co-text-secondary: #47598A;
+    --co-text-primary: #000000;
+    --co-text-secondary: #000000;
 
     /* B. Azul principal (identidad dominante navy) */
     --co-primary: #0B3D91;
@@ -50,9 +50,9 @@
     --line-soft: #D9E5FA;
     --line: var(--co-border);
     --line-strong: #A8C4F0;
-    --text-hi: var(--co-text-primary);
-    --text-md: var(--co-text-secondary);
-    --text-lo: #64748B;
+    --text-hi: #000000;
+    --text-md: #000000;
+    --text-lo: #000000;
     --cyan: var(--co-cyan);
     --cyan-soft: var(--co-blue-soft);
     --sky: #38BDF8;
@@ -67,9 +67,9 @@
     --bg-panel: var(--co-surface);
     --bg-raised: var(--co-surface);
     --bg-active: var(--co-blue-soft);
-    --fg-primary: var(--co-text-primary);
-    --fg-secondary: var(--co-text-secondary);
-    --fg-tertiary: #64748B;
+    --fg-primary: #000000;
+    --fg-secondary: #000000;
+    --fg-tertiary: #000000;
     --border-subtle: #D9E5FA;
     --border-default: var(--co-border);
     --border-strong: #A8C4F0;
@@ -113,7 +113,7 @@
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    color: var(--co-text-primary);
+    color: #000000;
     background-color: var(--co-background);
     background-image:
       linear-gradient(rgba(201, 217, 245, 0.35) 1px, transparent 1px),
@@ -129,7 +129,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    color: var(--co-text-primary);
+    color: #000000;
     font-family: 'Manrope', 'Inter', sans-serif;
     letter-spacing: -0.018em;
     text-wrap: balance;
@@ -605,7 +605,7 @@
     appearance: none;
     padding-right: 28px;
     cursor: pointer;
-    background-image: linear-gradient(45deg, transparent 50%, #47598A 50%), linear-gradient(135deg, #47598A 50%, transparent 50%);
+    background-image: linear-gradient(45deg, transparent 50%, #000000 50%), linear-gradient(135deg, #000000 50%, transparent 50%);
     background-position: calc(100% - 14px) 14px, calc(100% - 9px) 14px;
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
@@ -801,3 +801,43 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Sobreescritura de contraste — Letras grises a negras para máxima legibilidad
+   ========================================================================== */
+.text-\[\#47598A\],
+.text-\[\#64748B\],
+.text-\[\#0B1B3A\],
+.text-slate-100,
+.text-slate-200,
+.text-slate-300,
+.text-slate-400,
+.text-slate-500,
+.text-slate-600,
+.text-slate-700,
+.text-gray-300,
+.text-gray-400,
+.text-gray-500,
+.text-gray-600,
+.eyebrow,
+.label,
+.field-label,
+.field-help {
+  color: #000000 !important;
+}
+
+/* Excepciones deliberadas en componentes con fondo oscuro de cabecera y barra lateral */
+header .text-white,
+header .text-white\/90,
+header .text-white\/80,
+aside .text-\[\#DBEAFE\],
+aside .text-white,
+.btn-primary,
+.btn-primary span,
+.btn-danger,
+.btn-danger span,
+.btn-success,
+.btn-success span {
+  color: #FFFFFF !important;
+}
+

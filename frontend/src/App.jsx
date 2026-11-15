@@ -573,6 +573,55 @@ export default function App() {
     [crew, currentEnvironment, runSync, addLog],
   );
 
+  const handleRemoveAstronaut = useCallback(
+    (astronautId) => {
+      const astronaut = crew[astronautId];
+      if (!astronaut) return;
+
+      const crewKeys = Object.keys(crew);
+      if (crewKeys.length <= 1) {
+        addLog('WARN', 'Operación cancelada: Se requiere al menos un tripulante activo en la misión.');
+        return;
+      }
+
+      setCrewSeed((previous) => {
+        const next = { ...previous };
+        delete next[astronautId];
+        writeJSON(STORAGE_KEYS.crew, Object.values(next));
+        return next;
+      });
+
+      setRecords((previous) => {
+        const next = previous.filter(
+          (record) => !(record.category === 'astronaut' && record.data?.astronautId === astronautId),
+        );
+        saveRecords(next);
+        return next;
+      });
+
+      setTelemetryHistory((previous) => {
+        const next = { ...previous };
+        delete next[astronautId];
+        return next;
+      });
+
+      if (selectedAstronautId === astronautId) {
+        const remaining = crewKeys.filter((id) => id !== astronautId);
+        setSelectedAstronautId(remaining[0] || 'ast_001');
+      }
+
+      const remainingCrew = { ...crew };
+      delete remainingCrew[astronautId];
+      runSync('crew', () => api.replaceCrew(Object.values(remainingCrew)));
+
+      addLog(
+        'WARN',
+        `Tripulante retirado de la misión: ${astronaut.name} (${astronautId.toUpperCase()}) · ${astronaut.role}.`,
+      );
+    },
+    [crew, selectedAstronautId, runSync, addLog],
+  );
+
   const handleSaveRecord = ({ category, data, existingId }) => {
     const existing = existingId ? records.find((record) => record.id === existingId) : null;
     const record = createRecord({ category, data, existing });
@@ -680,7 +729,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-x-hidden text-slate-100">
+    <div className="relative flex min-h-screen w-full overflow-x-hidden text-black">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         aria-hidden="true"
@@ -733,6 +782,7 @@ export default function App() {
                   onOpenTelemetry={() => setActiveModule('telemetry')}
                   onOpenSimulator={() => setActiveModule('simulator')}
                   onOpenAddAstronaut={() => setIsAddAstronautOpen(true)}
+                  onRemoveAstronaut={handleRemoveAstronaut}
                 />
               ) : null}
 
@@ -754,6 +804,7 @@ export default function App() {
                   onOpenAlerts={() => openDashboardTab('alerts')}
                   onOpenData={() => openDashboardTab('data')}
                   onOpenAddAstronaut={() => setIsAddAstronautOpen(true)}
+                  onRemoveAstronaut={handleRemoveAstronaut}
                 />
               ) : null}
 

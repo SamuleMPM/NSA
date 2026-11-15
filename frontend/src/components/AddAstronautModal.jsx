@@ -189,7 +189,7 @@ export default function AddAstronautModal({
                   Agregar nuevo astronauta
                 </h2>
               </div>
-              <p className="mt-0.5 text-[11px] text-[#47598A]">
+              <p className="mt-0.5 text-[11px] text-[#000000]">
                 Incorpora un tripulante a la misión con activación inmediata de telemetría y monitoreo RIDGE.
               </p>
             </div>
@@ -198,7 +198,7 @@ export default function AddAstronautModal({
           <button
             type="button"
             onClick={onClose}
-            className="btn btn-ghost btn-icon text-[#47598A] hover:bg-white hover:text-[#0B3D91]"
+            className="btn btn-ghost btn-icon text-[#000000] hover:bg-white hover:text-[#0B3D91]"
             aria-label="Cerrar ventana"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -208,7 +208,7 @@ export default function AddAstronautModal({
         {/* Templates rápidos */}
         <div className="border-b border-[#C9D9F5]/70 bg-[#F5F8FE] px-5 py-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="mono flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-wider text-[#47598A]">
+            <span className="mono flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-wider text-[#000000]">
               <Sparkles className="h-3 w-3 text-[#0B3D91]" aria-hidden="true" />
               Carga rápida:
             </span>
@@ -240,7 +240,7 @@ export default function AddAstronautModal({
                 onChange={(e) => handleChange('id', e.target.value)}
                 placeholder="ast_004"
               />
-              <span className="mt-1 block text-[9.5px] text-[#47598A]">
+              <span className="mt-1 block text-[9.5px] text-[#000000]">
                 Código identificador único
               </span>
             </div>
@@ -263,7 +263,7 @@ export default function AddAstronautModal({
                   {errors.name}
                 </span>
               ) : (
-                <span className="mt-1 block text-[9.5px] text-[#47598A]">
+                <span className="mt-1 block text-[9.5px] text-[#000000]">
                   Nombre registrado en el manifiesto oficial
                 </span>
               )}
@@ -315,7 +315,7 @@ export default function AddAstronautModal({
             </span>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               <div>
-                <label className="field-label block text-[10.5px] font-medium text-[#47598A]">
+                <label className="field-label block text-[10.5px] font-medium text-[#000000]">
                   Edad (años) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -329,7 +329,7 @@ export default function AddAstronautModal({
               </div>
 
               <div>
-                <label className="field-label block text-[10.5px] font-medium text-[#47598A]">
+                <label className="field-label block text-[10.5px] font-medium text-[#000000]">
                   Sexo
                 </label>
                 <select
@@ -344,7 +344,7 @@ export default function AddAstronautModal({
               </div>
 
               <div>
-                <label className="field-label block text-[10.5px] font-medium text-[#47598A]">
+                <label className="field-label block text-[10.5px] font-medium text-[#000000]">
                   Altura (cm)
                 </label>
                 <input
@@ -359,7 +359,7 @@ export default function AddAstronautModal({
               </div>
 
               <div>
-                <label className="field-label block text-[10.5px] font-medium text-[#47598A]">
+                <label className="field-label block text-[10.5px] font-medium text-[#000000]">
                   Peso (kg)
                 </label>
                 <input
@@ -374,7 +374,7 @@ export default function AddAstronautModal({
               </div>
 
               <div>
-                <label className="field-label block text-[10.5px] font-medium text-[#47598A]">
+                <label className="field-label block text-[10.5px] font-medium text-[#000000]">
                   Grupo sanguíneo
                 </label>
                 <select
@@ -410,7 +410,7 @@ export default function AddAstronautModal({
                 value={formData.missionDays}
                 onChange={(e) => handleChange('missionDays', e.target.value)}
               />
-              <span className="mt-1 block text-[9.5px] text-[#47598A]">
+              <span className="mt-1 block text-[9.5px] text-[#000000]">
                 Tiempo en vuelo orbital o tránsito
               </span>
               {errors.missionDays && (
@@ -432,7 +432,7 @@ export default function AddAstronautModal({
                 onChange={(e) => handleChange('notes', e.target.value)}
                 placeholder="Antecedentes, adaptaciones o notas de misión…"
               />
-              <span className="mt-1 block text-[9.5px] text-[#47598A]">
+              <span className="mt-1 block text-[9.5px] text-[#000000]">
                 Información complementaria registrada en el expediente
               </span>
             </div>
@@ -440,7 +440,7 @@ export default function AddAstronautModal({
 
           {/* Footer de acciones */}
           <div className="flex items-center justify-between border-t border-[#C9D9F5] pt-4">
-            <span className="mono text-[10px] text-[#47598A]">
+            <span className="mono text-[10px] text-[#000000]">
               Los signos vitales se inicializarán automáticamente en rango nominal.
             </span>
             <div className="flex items-center gap-2">

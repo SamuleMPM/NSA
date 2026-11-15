@@ -91,7 +91,7 @@ export default function VitalCard({
 
   const deltaTone =
     delta === 0
-      ? 'text-[#47598A] bg-[#F8FAFD] border-[#C9D9F5]'
+      ? 'text-[#000000] bg-[#F8FAFD] border-[#C9D9F5]'
       : variable === 'spo2'
         ? delta > 0
           ? 'text-[#047857] bg-[#D1FAE5] border-[#A7F3D0]'
@@ -123,11 +123,11 @@ export default function VitalCard({
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#47598A]">
+              <span className="mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#000000]">
                 {meta.code}
               </span>
               <span className="h-2.5 w-px bg-[#C9D9F5]" />
-              <span className="mono text-[9px] text-[#47598A]">REF {normalRange}</span>
+              <span className="mono text-[9px] text-[#000000]">REF {normalRange}</span>
             </div>
             <h3 className="mt-0.5 truncate font-heading text-[12.5px] font-bold tracking-tight text-[#0B3D91]">
               {title}
@@ -148,7 +148,7 @@ export default function VitalCard({
           >
             {value !== undefined ? value : '--'}
           </span>
-          <span className="mono pb-0.5 text-[10px] font-semibold text-[#47598A]">{unit}</span>
+          <span className="mono pb-0.5 text-[10px] font-semibold text-[#000000]">{unit}</span>
         </div>
 
         <span className={`mono inline-flex items-center gap-1 rounded border px-1.5 py-1 text-[9.5px] font-bold ${deltaTone}`}>
@@ -195,7 +195,7 @@ export default function VitalCard({
           />
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#47598A]">
+        <div className="mt-1.5 flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#000000]">
           <span className="flex items-center gap-1">
             <span className="h-1 w-1 rounded-full bg-[#047857]" />
             ZONA NOMINAL
@@ -207,7 +207,7 @@ export default function VitalCard({
       </div>
 
       <div className="mt-2 border-t border-[#C9D9F5] pt-1.5">
-        <div className="flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#47598A]">
+        <div className="flex items-center justify-between gap-2 font-mono text-[8.5px] text-[#000000]">
           <span>UMBRAL ALERTA</span>
           <span className="font-bold text-[#0B1B3A]">{alertCondition}</span>
         </div>

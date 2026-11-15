@@ -85,6 +85,7 @@ export default function DashboardOverview({
   onApplyCountermeasure,
   onResetNominal,
   onOpenAddAstronaut,
+  onRemoveAstronaut,
 }) {
   const worst = worstSeverity(evaluations);
   const worstInfo = SEVERITY_LEVELS[worst] || SEVERITY_LEVELS.normal;
@@ -168,6 +169,7 @@ export default function DashboardOverview({
           onSelect={setSelectedAstronautId}
           latestVitalsByAstronaut={latestVitalsByAstronaut}
           onOpenAddModal={onOpenAddAstronaut}
+          onRemoveAstronaut={onRemoveAstronaut}
         />
       </section>
 

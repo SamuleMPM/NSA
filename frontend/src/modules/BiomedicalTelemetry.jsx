@@ -69,6 +69,7 @@ export default function BiomedicalTelemetry({
   onOpenAlerts,
   onOpenData,
   onOpenAddAstronaut,
+  onRemoveAstronaut,
 }) {
   const [viewMode, setViewMode] = useState('xray');
   const [selectedOrganId, setSelectedOrganId] = useState('heart');
@@ -153,6 +154,7 @@ export default function BiomedicalTelemetry({
           onSelect={setSelectedAstronautId}
           latestVitalsByAstronaut={latestVitalsByAstronaut}
           onOpenAddModal={onOpenAddAstronaut}
+          onRemoveAstronaut={onRemoveAstronaut}
         />
       </section>
 

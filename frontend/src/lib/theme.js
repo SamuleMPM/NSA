@@ -8,8 +8,8 @@ export const CLEAN_ORBIT = {
   background: '#EAF1FE',
   surface: '#FFFFFF',
   border: '#C9D9F5',
-  textPrimary: '#0B1B3A',
-  textSecondary: '#47598A',
+  textPrimary: '#000000',
+  textSecondary: '#000000',
 
   /* B. Azul principal (identidad dominante navy) */
   primary: '#0B3D91',

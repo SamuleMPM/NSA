@@ -234,13 +234,13 @@ export default function TelemetryCharts({ history = [] }) {
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[10px] font-semibold transition-colors ${
                   active
                     ? 'border-[#0B3D91] bg-[#DBEAFE] text-[#0B3D91]'
-                    : 'border-[#C9D9F5] bg-white text-[#47598A] hover:bg-[#F8FAFD] hover:text-[#0B1B3A]'
+                    : 'border-[#C9D9F5] bg-white text-[#000000] hover:bg-[#F8FAFD] hover:text-[#0B1B3A]'
                 }`}
                 aria-pressed={active}
               >
                 <Icon className="h-3 w-3" style={{ color: active ? cfg.color : undefined }} aria-hidden="true" />
                 <span>{cfg.short}</span>
-                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-[#0B3D91]/70' : 'text-[#47598A]'}`}>
+                <span className={`hidden text-[9px] font-normal sm:inline ${active ? 'text-[#0B3D91]/70' : 'text-[#000000]'}`}>
                   {cfg.unit}
                 </span>
               </button>
@@ -260,7 +260,7 @@ export default function TelemetryCharts({ history = [] }) {
           <div className="panel-inset px-2.5 py-2">
             <span className="eyebrow block">ACTUAL</span>
             <span className="value-sm mt-1 block" style={{ color: currentCfg.color }}>
-              {latestVal} <span className="text-[9px] font-normal text-[#47598A]">{currentCfg.unit}</span>
+              {latestVal} <span className="text-[9px] font-normal text-[#000000]">{currentCfg.unit}</span>
             </span>
           </div>
           <div className="panel-inset px-2.5 py-2">
@@ -304,7 +304,7 @@ export default function TelemetryCharts({ history = [] }) {
                     x={paddingX - 10}
                     y={y + 3}
                     textAnchor="end"
-                    fill="#47598A"
+                    fill="#000000"
                     fontSize="9"
                     fontFamily="'JetBrains Mono', monospace"
                   >
@@ -377,7 +377,7 @@ export default function TelemetryCharts({ history = [] }) {
                       x={pt.x}
                       y={svgHeight - 10}
                       textAnchor="middle"
-                      fill="#47598A"
+                      fill="#000000"
                       fontSize="8"
                       fontFamily="'JetBrains Mono', monospace"
                     >
@@ -390,7 +390,7 @@ export default function TelemetryCharts({ history = [] }) {
           </svg>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] text-[#47598A]">
+        <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] text-[#000000]">
           <span className="flex items-center gap-1.5">
             <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: currentCfg.color }} />
             {currentCfg.label.toUpperCase()} · {currentCfg.unit}

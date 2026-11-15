@@ -157,6 +157,7 @@ export default function DataEntry({
   onDeleteRecord,
   onOpenDictionary,
   onOpenAddAstronaut,
+  onRemoveAstronaut,
 }) {
   const [category, setCategory] = useState('vitals');
   const [values, setValues] = useState({});
@@ -261,6 +262,9 @@ export default function DataEntry({
 
   const handleDelete = (record) => {
     onDeleteRecord(record.id);
+    if (category === 'astronaut' && record.data?.astronautId && onRemoveAstronaut) {
+      onRemoveAstronaut(record.data.astronautId);
+    }
     if (editingId === record.id) resetForm();
     notify('success', 'Registro eliminado. Las alertas y riesgos derivados se han actualizado.');
   };

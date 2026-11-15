@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Heart,
   Activity,
@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   ChevronRight,
   UserPlus,
+  Trash2,
+  X,
 } from 'lucide-react';
 import StatusPill from './ui/StatusPill';
 
@@ -64,7 +66,9 @@ export default function AstronautSelector({
   onSelect,
   latestVitalsByAstronaut = {},
   onOpenAddModal,
+  onRemoveAstronaut,
 }) {
+  const [astronautPendingDelete, setAstronautPendingDelete] = useState(null);
   const crewList = Object.entries(astronauts);
 
   return (
@@ -74,7 +78,7 @@ export default function AstronautSelector({
           <span className="mono rounded border border-[#C9D9F5] bg-[#DBEAFE] px-2 py-0.5 text-[9px] font-bold text-[#0B3D91]">
             TRIPULACIÓN ({crewList.length})
           </span>
-          <span className="text-[11px] font-medium text-[#47598A]">
+          <span className="text-[11px] font-medium text-black">
             Enfoca la telemetría, visor 3D y evaluación clínica en un tripulante
           </span>
         </div>
@@ -189,10 +193,10 @@ export default function AstronautSelector({
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="truncate font-heading text-[12.5px] font-bold text-[#0B1B3A]">
+                      <span className="truncate font-heading text-[12.5px] font-bold text-black">
                         {ast.name}
                       </span>
-                      <span className="mono text-[8.5px] text-[#47598A]">{roleCode(ast.role)}</span>
+                      <span className="mono text-[8.5px] text-black">{roleCode(ast.role)}</span>
                       {isCritical || isWarning ? (
                         <AlertTriangle
                           className={`h-3 w-3 shrink-0 ${isCritical ? 'text-[#A16207]' : 'text-[#0369A1]'}`}
@@ -200,23 +204,55 @@ export default function AstronautSelector({
                         />
                       ) : null}
                     </div>
-                    <span className="mono mt-0.5 block truncate text-[9px] text-[#47598A]">
+                    <span className="mono mt-0.5 block truncate text-[9px] text-black">
                       {id.toUpperCase()} · {ast.role}
                     </span>
                   </div>
                 </div>
 
-                <span
-                  className={`mono shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold ${
-                    isSelected
-                      ? 'border-[#0B3D91] bg-[#0B3D91] text-white'
-                      : isEva
-                        ? 'border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]'
-                        : 'border-[#C9D9F5] bg-white text-[#47598A]'
-                  }`}
-                >
-                  {ast.activity}
-                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span
+                    className={`mono shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold ${
+                      isSelected
+                        ? 'border-[#0B3D91] bg-[#0B3D91] text-white'
+                        : isEva
+                          ? 'border-[#C9D9F5] bg-[#DBEAFE] text-[#0B3D91]'
+                          : 'border-[#C9D9F5] bg-white text-black'
+                    }`}
+                  >
+                    {ast.activity}
+                  </span>
+
+                  {onRemoveAstronaut ? (
+                    <button
+                      type="button"
+                      disabled={crewList.length <= 1}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (crewList.length <= 1) return;
+                        setAstronautPendingDelete({
+                          id,
+                          name: ast.name,
+                          role: ast.role,
+                          activity: ast.activity,
+                        });
+                      }}
+                      className={`flex h-6 w-6 items-center justify-center rounded border transition-colors ${
+                        crewList.length <= 1
+                          ? 'opacity-30 cursor-not-allowed border-transparent text-gray-400'
+                          : 'border-transparent text-black hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600'
+                      }`}
+                      title={
+                        crewList.length <= 1
+                          ? 'Se requiere al menos un tripulante en la misión'
+                          : `Quitar a ${ast.name} de la misión`
+                      }
+                      aria-label={`Quitar a ${ast.name} de la misión`}
+                    >
+                      <Trash2 className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
               </div>
 
               <div className="mt-2.5 grid grid-cols-4 gap-1.5">
@@ -227,7 +263,7 @@ export default function AstronautSelector({
                     level === 'critical' ? '#A16207' : level === 'warning' ? '#0369A1' : metric.color;
                   return (
                     <div key={metric.key} className="panel-inset px-1.5 py-1.5">
-                      <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-[#47598A]">
+                      <span className="mono flex items-center gap-1 text-[8px] uppercase tracking-wider text-black">
                         <Icon className="h-2.5 w-2.5" style={{ color: metricColor }} aria-hidden="true" />
                         {metric.label}
                       </span>
@@ -237,11 +273,11 @@ export default function AstronautSelector({
                             ? 'text-[#A16207]'
                             : level === 'warning'
                               ? 'text-[#0369A1]'
-                              : 'text-[#0B1B3A]'
+                              : 'text-black'
                         }`}
                       >
                         {metric.value ?? '--'}
-                        <span className="ml-0.5 text-[7.5px] font-normal text-[#47598A]">{metric.unit}</span>
+                        <span className="ml-0.5 text-[7.5px] font-normal text-black">{metric.unit}</span>
                       </span>
                     </div>
                   );
@@ -265,7 +301,7 @@ export default function AstronautSelector({
                     </>
                   )}
                 </StatusPill>
-                <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-[#47598A] group-hover:text-[#0B3D91]">
+                <span className="mono flex items-center gap-0.5 text-[8.5px] font-semibold text-black group-hover:text-[#0B3D91]">
                   TELEMETRÍA
                   <ChevronRight className="h-2.5 w-2.5" aria-hidden="true" />
                 </span>
@@ -287,12 +323,73 @@ export default function AstronautSelector({
             <span className="mt-2.5 font-heading text-[12.5px] font-bold text-[#0B3D91]">
               + Agregar astronauta
             </span>
-            <span className="mono mt-1 text-[9px] text-[#47598A]">
+            <span className="mono mt-1 text-[9px] text-black">
               Incorporar nuevo tripulante
             </span>
           </button>
         ) : null}
       </div>
+
+      {/* Modal de confirmación para quitar astronauta */}
+      {astronautPendingDelete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="panel w-full max-w-md overflow-hidden rounded-lg border border-[#C9D9F5] bg-white p-5 shadow-2xl">
+            <div className="flex items-start gap-3.5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading text-[14px] font-bold text-black">
+                    ¿Quitar astronauta de la misión?
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setAstronautPendingDelete(null)}
+                    className="text-black hover:text-rose-600"
+                    aria-label="Cerrar modal"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-black">
+                  Estás a punto de retirar a <span className="font-bold text-black">{astronautPendingDelete.name}</span> ({astronautPendingDelete.id.toUpperCase()}) de la tripulación activa.
+                </p>
+                <div className="mt-2.5 rounded border border-[#C9D9F5] bg-[#F8FAFD] p-2.5 text-[10.5px] text-black space-y-0.5">
+                  <div className="mono font-semibold text-black">Rol: {astronautPendingDelete.role}</div>
+                  <div className="mono text-black">Actividad: {astronautPendingDelete.activity}</div>
+                  <div className="pt-1 text-rose-600 font-semibold">
+                    ⚠️ Se suspenderá la simulación de constantes vitales y el monitoreo activo para este tripulante.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-end gap-2 border-t border-[#C9D9F5] pt-3">
+              <button
+                type="button"
+                onClick={() => setAstronautPendingDelete(null)}
+                className="btn !min-h-[32px] !px-3.5 !py-1 text-[11px] font-semibold text-black"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onRemoveAstronaut) {
+                    onRemoveAstronaut(astronautPendingDelete.id);
+                  }
+                  setAstronautPendingDelete(null);
+                }}
+                className="btn btn-danger !min-h-[32px] !px-3.5 !py-1 text-[11px] font-bold"
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Confirmar baja de la misión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

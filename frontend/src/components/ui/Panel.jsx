@@ -41,7 +41,7 @@ export function PanelHeader({
             {title}
           </h3>
           {description ? (
-            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-[#47598A]">
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-[#000000]">
               {description}
             </p>
           ) : null}
